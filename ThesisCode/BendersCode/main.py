@@ -1,17 +1,16 @@
 import pandas as pd
-from integratedModel import IntegratedModel
-from undergroundModel import UndergroundModel
-from openPitModel import OpenPitModel
+from Subproblem import OpenPitModel
+from MasterProblem import UndergroundModel
+
 
 class Main:
     def __init__(self, path, undergroundDatabaseName, openPitDatabaseName):
         self.path = path
         self.openPitDatabaseName = openPitDatabaseName
         self.undergroundDatabaseName = undergroundDatabaseName
-        self.runIntegratedModel = False
         self.runOpenPitModel = False
-        self.runUndergroundModel = False
-        self.numberOfPeriods =4
+        self.runUndergroundModel = True
+        self.numberOfPeriods = 4
         self.models = []
         
     def execute(self):
@@ -26,19 +25,13 @@ class Main:
         #self.getResults(self.model)
 
     def setMineDatabases(self):
-        if self.runIntegratedModel:  
-            self.openMineDataframe = pd.read_excel(self.path+self.openPitDatabaseName, engine="openpyxl")
+        if self.runUndergroundModel:
             self.undergroundMineDataframe = pd.read_excel(self.path+self.undergroundDatabaseName, engine="openpyxl")
-        else:
-            if self.runUndergroundModel:
-                self.undergroundMineDataframe = pd.read_excel(self.path+self.undergroundDatabaseName, engine="openpyxl")
 
-            if self.runOpenPitModel:
-                self.openMineDataframe = pd.read_excel(self.path+self.openPitDatabaseName, engine="openpyxl")
+        if self.runOpenPitModel:
+            self.openMineDataframe = pd.read_excel(self.path+self.openPitDatabaseName, engine="openpyxl")
     
     def createModels(self):
-        if self.runIntegratedModel:  
-            self.createIntegratedModel()
 
         if self.runUndergroundModel:
             self.createUndergroundModel()
@@ -46,9 +39,6 @@ class Main:
         if self.runOpenPitModel:
             self.createOpenPitModel()
 
-    def createIntegratedModel(self):
-        self.integratedModel = IntegratedModel(self.undergroundMineDataframe, self.openMineDataframe,self.numberOfPeriods)
-        self.models.append(self.integratedModel)
 
     def createUndergroundModel(self):
         self.undergroundModel = UndergroundModel(self.undergroundMineDataframe, self.numberOfPeriods)
@@ -68,10 +58,6 @@ class Main:
                 self.openPitObjValue, self.openPitVariableValues, self.openPitRuntime, self.openPitGap = model.execute()
                 print("Objective Value: {} RunTime: {} GAP: {}" .format(self.openPitObjValue, self.openPitRuntime, self.openPitGap))
                 self.calculateOpenPitCapacitiesPerPeriod()
-
-            if isinstance(model, IntegratedModel):
-                self.integratedObjValue, self.integratedVariableValues, self.integratedRuntime, self.integratedGap = model.execute()
-                print("Objective Value: {} RunTime: {} GAP: {}" .format(self.integratedObjValue, self.integratedRuntime, self.integratedGap))
 
     def calculateOpenPitCapacitiesPerPeriod(self):
         self.openPitTonelagePerPeriod = {}
@@ -100,6 +86,7 @@ class Main:
 
 path = "C:/Users/Williams Medina/Desktop/Tesis Magister/Tesis-Magister/ThesisCode/MainCode/Databases/integratedModel/"
 undergroundDatabaseName = 'Modelo_F_OG.xlsx'
+#undergroundDatabaseName = 'Modelo_F_OG_4_4_4.xlsx'
 #openPitDatabaseName = 'Modelo_F_OG.xlsx'
 openPitDatabaseName = 'Modelo_F_OG_4_4_4.xlsx'
 main = Main(path, undergroundDatabaseName, openPitDatabaseName)

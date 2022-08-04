@@ -45,16 +45,16 @@ class UndergroundModel:
     def setUndergroundParameters(self):
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
-        self.MU_mt = {period : 697507200000000.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 0 for period in range(self.numberOfPeriods)}
-        self.MU_pt = {period : 6460300000000000.8  for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 0 for period in range(self.numberOfPeriods)}
+        self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
+        self.ML_mt = {period : 17204400.0  for period in range(self.numberOfPeriods)}
+        self.MU_pt = {period : 17777880.0   for period in range(self.numberOfPeriods)}#Mineral es planta
+        self.ML_pt = {period : 17204400.0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
-        self.NU_nt = {period : 4200000000000 for period in range(self.numberOfPeriods)} 
-        self.NL_nt = {period : 0 for period in range(self.numberOfPeriods)}
-        self.N_t   = {period : int((0.75*self.NU_nt[0] + 0.25*self.NL_nt[0])/2)*1000000000000000000 * (1 + period) for period in range(self.numberOfPeriods)}
+        self.NU_nt = {period : 59 for period in range(self.numberOfPeriods)} 
+        self.NL_nt = {period : 32 for period in range(self.numberOfPeriods)}
+        self.N_t   = {period : 57* (1 + period) for period in range(self.numberOfPeriods)}
         self.RL_dt = {period : 0.3 for period in range(self.numberOfPeriods)}
         self.RU_dt = {period : 0.7 for period in range(self.numberOfPeriods)}
 
@@ -156,15 +156,15 @@ class UndergroundModel:
         restricion_partida_2 = undergroundModel.addConstr(y_dt_S_I[predecessor[0][0],0] >= 0.3, "restriccion_partida 2")
 
         ## Se debe extraer un mínimo de un 90% de cada drawpoint
-        restricion_partida_E =undergroundModel.addConstrs((gp.quicksum(y_dt_S_I[d, ti]*z_dt_S_I[d, ti] for ti in t_S) >= 0.8
-                                                        for d in drawpoint), "Reserver_cnst")
+        #restricion_partida_E =undergroundModel.addConstrs((gp.quicksum(y_dt_S_I[d, ti]*z_dt_S_I[d, ti] for ti in t_S) >= 0.8
+         #                                               for d in drawpoint), "Reserver_cnst")
 
         ## Los drawpoints se extraen en orden (es decir que el z anterior debe estar activo para que el siguiente lo esté)
         restricion_z_dt = undergroundModel.addConstrs((gp.quicksum(z_dt_S_I[predecessor[l][0], m]*(max(t_S)-m+1) for m in t_S) <=
                                     gp.quicksum(z_dt_S_I[predecessor[l][1], m]*(max(t_S)-m+1) for m in t_S)  
                                     for l in range(len(predecessor))), "DP_Sup")
         
-        undergroundObjectiveFunction = gp.quicksum(y_dt_S_I[d, ti]*((((0.7*basePrice*LEY_D[d]-C_P_D[d])*MIN_D[d])-(C_M_D[d]*TON_d[d]))/
+        undergroundObjectiveFunction = gp.quicksum(y_dt_S_I[d, ti]*((((basePrice*LEY_D[d]-C_P_D[d])*MIN_D[d])-(C_M_D[d]*TON_d[d]))/
                                         ((1+0.1)**(t_S[ti]))) for ti in t_S for d in drawpoint)
        
         undergroundModel.setObjective(undergroundObjectiveFunction, GRB.MAXIMIZE)

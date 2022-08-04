@@ -1,6 +1,5 @@
 import gurobipy   as     gp
 from   gurobipy   import GRB
-from openPitModel import *
 from globalFunctions import getNumberOfBlocksInADimension
 from openPitFunctions import finalBlock
 
@@ -37,14 +36,15 @@ class OpenPitModel:
    def setOpenPitParameters(self):
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
-      self.RMu_t = {period : 8683200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
-      self.RMl_t = {period : 5788800.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
-      self.RPu_t = {period : 4601205.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
-      self.RPl_t = {period : 4162995.0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
+      self.RMu_t = {period : 13219200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
+      self.RMl_t = {period : 8812800.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
+      self.RPu_t = {period : 10933380.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
+      self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0 for period in range(self.numberOfPeriods)}
+      self.ql_t  = {period : 0 for period in range(self.numberOfPeriods)}
       self.maxTimeOpenPit = self.t_C[max(self.t_C)]
-
+      
    def setOpenPitMineLimits(self):
       self.openPitBlocksLenghtLimits = getNumberOfBlocksInADimension(self.openPitBlocksLenght)
       self.openPitBlocksWidthLimits = getNumberOfBlocksInADimension(self.openPitBlocksWidth)
