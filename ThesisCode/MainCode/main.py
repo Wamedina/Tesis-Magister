@@ -11,7 +11,7 @@ class Main:
         self.runIntegratedModel = False
         self.runOpenPitModel = False
         self.runUndergroundModel = False
-        self.numberOfPeriods =4
+        self.numberOfPeriods = 4
         self.models = []
         
     def execute(self):

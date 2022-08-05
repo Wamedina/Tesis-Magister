@@ -141,7 +141,7 @@ class UndergroundModel:
                                                     "Drawpextract_66")
 
         #10. Existe una tasa m ́ınima de extracci ́on para cada drawpoint a extraer.
-        Drawpextract_67_1 = undergroundModel.addConstrs((self.RL_dt[ti] * z_dt[d, ti]  <=  y_dt[d, ti] for d in self.drawpoint
+        Drawpextract_67_1 = undergroundModel.addConstrs((self.RL_dt[ti] * z_dt[d, ti]  <= self.Q_d * y_dt[d, ti] for d in self.drawpoint
                                                         for ti in self.t_S), "Drawpextract_67_1")
 
         #11. La altura a extraer debe ser mayor a una cantidad m ́ınima.
