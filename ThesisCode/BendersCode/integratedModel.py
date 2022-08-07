@@ -28,18 +28,18 @@ class IntegratedModel:
         return self.objValue, self.variableValues, self.runtime, self.gap  
 
     def setOpenPitVariables(self):
-        self.openPitBlocksLenght = self.openMineDataframe['X'].to_dict() 
+        self.openPitBlocksLength = self.openMineDataframe['X'].to_dict() 
         self.openPitBlocksWidth = self.openMineDataframe['Y'].to_dict() 
         self.openPitBlocksHeight = self.openMineDataframe['Z'].to_dict() 
-        self.openPitBlockTonnage = self.openMineDataframe['Ton'].to_dict() 
-        self.openPitBlockMineral = self.openMineDataframe['Mineral'].to_dict()
-        self.openPitBlockRecovery = self.openMineDataframe['Recuperación'].to_dict() 
-        self.openPitCopperLaw = self.openMineDataframe['%Cu'].to_dict()
-        self.openPitExtractionFixedCosts = self.openMineDataframe['CPlanta CA'].to_dict()
-        self.openPitVariableExtractionCosts = self.openMineDataframe['CMina CA'].to_dict()
+        self.L_b = self.openMineDataframe['Ton'].to_dict() #openPitBlockTonnage
+        self.o_b = self.openMineDataframe['Mineral'].to_dict() #openPitBlockMineral
+        self.openPitBlockRecovery = self.openMineDataframe['Recuperación'].to_dict() #openPitBlockRecovery
+        self.openPitCopperLaw = self.openMineDataframe['%Cu'].to_dict() #openPitCopperLaw
+        self.c_pbt = self.openMineDataframe['CPlanta CA'].to_dict() #openPitPlantCapacity
+        self.c_mbt = self.openMineDataframe['CMina CA'].to_dict() #openPitMineCapacity
       
     def setUndergroundVariables(self):
-        self.undergroundBlocksLenght = self.undergroundMineDataframe['X'].to_dict()             
+        self.undergroundBlocksLength = self.undergroundMineDataframe['X'].to_dict()             
         self.undergroundBlocksWidth  = self.undergroundMineDataframe['Y'].to_dict()             
         self.undergroundBlocksHeight = self.undergroundMineDataframe['Z'].to_dict()             
         self.undergroundBlockTonnage = self.undergroundMineDataframe['Ton'].to_dict()              
@@ -52,17 +52,17 @@ class IntegratedModel:
         self.undergroundCM_S = self.undergroundMineDataframe['CMINA S'].to_dict() 
 
     def setMineLimits(self):
-        self.undergroundBlocksLenghtLimits = getNumberOfBlocksInADimension(self.undergroundBlocksLenght)
+        self.undergroundBlocksLengthLimits = getNumberOfBlocksInADimension(self.undergroundBlocksLength)
         self.undergroundBlocksWidthLimits = getNumberOfBlocksInADimension(self.undergroundBlocksWidth)
         self.undergroundBlocksHeightLimits = getNumberOfBlocksInADimension(self.undergroundBlocksHeight)
 
-        self.openPitBlocksLenghtLimits = getNumberOfBlocksInADimension(self.openPitBlocksLenght)
+        self.openPitBlocksLengthLimits = getNumberOfBlocksInADimension(self.openPitBlocksLength)
         self.openPitBlocksWidthLimits = getNumberOfBlocksInADimension(self.openPitBlocksWidth)
         self.openPitBlocksHeightLimits = getNumberOfBlocksInADimension(self.openPitBlocksHeight)
 
     def getBlockInfo(self):
-        self.openPitBlocks = [i for i in range(len(self.openPitBlocksLenght.values()))]
-        self.S_blocks = [i for i in range(len(self.undergroundBlocksLenght.values()))]
+        self.openPitBlocks = [i for i in range(len(self.openPitBlocksLength.values()))]
+        self.S_blocks = [i for i in range(len(self.undergroundBlocksLength.values()))]
 
     def setParametersToEvaluate(self):
         #OpenPit Parameters
@@ -96,16 +96,12 @@ class IntegratedModel:
     def setGlobalParameters(self):
         self.colHeight = 300
         self.securityLevel = 30
-        pricePonderator = 1
-        mineCostPonderator = 1
-        plantCostPonderator = 1
-        self.basePrice = 3791.912 * pricePonderator
-        self.mineCostPonderator = 1 * mineCostPonderator
-        self.basePlantCostPonderator = 1 * plantCostPonderator
+        self.p_t = 3791.912 
+        self.desc = 0.1
         self.setMineLimits()
         self.predecessorBlock = self.setPredecessorBlock()
 
-        self.dif_centroide = self.openPitBlocksLenghtLimits[0]//2 - self.undergroundBlocksLenghtLimits[0]//2
+        self.dif_centroide = self.openPitBlocksLengthLimits[0]//2 - self.undergroundBlocksLengthLimits[0]//2
         ZZ = 780
         self.pos_x = 430         
         self.pos_y = 550         
@@ -113,11 +109,11 @@ class IntegratedModel:
 
     def setPredecessorBlock(self):
         predecessorBlock = []
-        superiorBlock = finalBlock(self.CA_blocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
-        for i in range(len(self.CA_blocks)):
+        superiorBlock = finalBlock(self.openPitBlocks, self.openPitBlocksLengthLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
+        for i in range(len(self.openPitBlocks)):
             for j in superiorBlock[i]:
                 aux_1 = []
-                aux_1.append(self.CA_blocks[i])
+                aux_1.append(self.openPitBlocks[i])
                 aux_1.append(j)
                 predecessorBlock.append(aux_1)
         return predecessorBlock
@@ -128,29 +124,19 @@ class IntegratedModel:
         pos_y_f = 910     
         orientationToExtractTheDrawpoints = 0
         
-        self.drawpoint, self.TON_d, self.MIN_D,self.LEY_D, self.C_P_D, self.C_M_D, self.predecessor, self.x_draw,self.y_draw, self.z_draw = drawpointFunction(
-        self.pos_x, self.pos_y, self.pos_z, self.colHeight, DP_init, self.undergroundBlocksLenghtLimits, self.undergroundBlocksWidthLimits, self.undergroundBlocksHeightLimits, self.undergroundBlockTonnage, self.undergroundCP_S, self.undergroundCM_S, self.undergroundBlockMineral,
-        self.undergroundCopperLaw, pos_x_f, pos_y_f,orientationToExtractTheDrawpoints)
+        self.drawpoint, self.G_d, self.Q_d,self.LEY_D, self.C_pdt, self.C_mdt, self.predecessor, self.x_draw,self.y_draw, self.z_draw = drawpointFunction(
+                        self.pos_x, self.pos_y, self.pos_z, self.colHeight, DP_init, self.undergroundBlocksLengthLimits, self.undergroundBlocksWidthLimits, self.undergroundBlocksHeightLimits, self.undergroundBlockTonnage, self.undergroundCP_S, self.undergroundCM_S, self.undergroundBlockMineral,
+                        self.undergroundCopperLaw, pos_x_f, pos_y_f, orientationToExtractTheDrawpoints)
 
     def setPossibleHeights(self):
-        self.blockHeight, self.minHeight, self.maxHeight, self.numOfDifferentsBlocks = self.undergroundBlocksHeightLimits
+        self.blockHeight, self.maxHeight, self.minHeight, self.numOfDifferentsBlocks = self.undergroundBlocksHeightLimits
 
     def setModelAndGetResults(self):
-        self.objValue, self.variableValues, self.runtime, self.gap = self.setIntegratedModel(self.CA_blocks,self.drawpoint,self.openPitBlocksHeight,self.dif_centroide,self.pos_z,self.colHeight,self.securityLevel,self.predecessorBlock,self.predecessor,
-                         self.openPitBlockTonnage,self.openPitBlockMineral,self.openPitBlockRecovery,self.openPitCopperLaw,self.openPitVariableExtractionCosts,self.openPitExtractionFixedCosts,
-                         self.TON_d,self.MIN_D,self.undergroundBlockRecovery,self.LEY_D,self.C_P_D,self.C_M_D,
-                         self.t_C ,self.RMu_t,self.RMl_t,self.RPu_t,self.RPl_t,self.qu_t ,self.ql_t,self.maxTimeOpenPit,
-                         self.t_S ,self.MU_mt,self.ML_mt,self.MU_pt,self.ML_pt,self.qU_dt,self.qL_dt,self.A_d,self.NU_nt,self.NL_nt,self.N_t ,self.RL_dt ,self.RU_dt ,self.maxTimeUnderground,
-                         0.01,self.basePrice,self.mineCostPonderator,self.basePlantCostPonderator)
+        self.objValue, self.variableValues, self.runtime, self.gap = self.setIntegratedModel()
 
     def setIntegratedModel(self):
          
         integratedModel = gp.Model(name = 'Modelo Integrado')
-
-        # Open Pit
-        x_bt = integratedModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.BINARY, name="x")
-
-
 
         # Underground  Model
 
@@ -235,7 +221,6 @@ class IntegratedModel:
                                                     , "Drawpextract_65")
 
         
-
         #16. Restricción sobre el inicio de la extracci ́on de los drawpoints.
         DP_Sup = integratedModel.addConstrs((gp.quicksum(x_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
                                     gp.quicksum(x_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
@@ -246,32 +231,16 @@ class IntegratedModel:
                                     gp.quicksum(z_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
                                     for l in range(len(self.predecessor))), "DP_Sup")
 
+        # Open Pit
+        x_bt = integratedModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.BINARY, name="x")
 
-        
-        
+
         #Función objetivo
+        
         undergroundObjectiveFunction = gp.quicksum(y_dt[d, ti]*((((self.p_t * self.LEY_D[d] -self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
                                         ((1+self.desc)**(self.t_S[ti]))) for ti in self.t_S for d in self.drawpoint)
         
         
-        #FALTA DEFINIR LOS CONJUNTOS B_v
-
-        V = [height for height in chain(range(self.maxHeight,self.minHeight,self.blockHeight), [self.minHeight])]
-        rho_v = [1 - (v - self.maxHeight)/(self.minHeight - self.maxHeight) for v in V]
-
-        #Restricciones del crown pillar
-
-        #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
-        w_v = integratedModel.addVars(self.t_S,V, vtype=GRB.BINARY, name="w")
-
-        #Restricciones del crown pillar
-        pillar_1 = integratedModel.addConstrs(gp.quicksum(x_dt[d, ti] for d in B_v)<=1 - w_v[v] for v in V for ti in self.t_S)
-
-        pillar_2 = integratedModel.addConstrs(gp.quicksum(y_dt[d, ti] for d in self.drawpoint
-                                                        for ti in self.t_S)<= rho_v * w_v[t,v] + (1-w_v[t,v]) for v in V for t in self.t_C)
-
-        x_bt = integratedModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.BINARY, name="x")
-
         #1. Restricci ́on sobre la cantidad de tonelaje m ́axima y m ́ınima a extraer en cada periodo.
         Ton_Up  = integratedModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
                                 <= self.RMu_t[ti] for ti in self.t_C), "Ton_max")
@@ -303,10 +272,31 @@ class IntegratedModel:
                                 "Reserve_cons")
 
         #Función objetivo
-        openPitObjectiveFunction = gp.quicksum(x_bt[ti, b]*((((self.basePrice*self.openPitCopperLaw[b]-self.c_pbt[b])*self.o_b[b])-(self.c_mbt[b]*self.L_b[b]))/((1+self.desc)**self.t_C[ti]))
+        openPitObjectiveFunction = gp.quicksum(x_bt[ti, b]*((((self.p_t*self.openPitCopperLaw[b]-self.c_pbt[b])*self.o_b[b])-(self.c_mbt[b]*self.L_b[b]))/((1+self.desc)**self.t_C[ti]))
                     for ti in self.t_C for b in self.openPitBlocks)
 
-        ##FALTA DEFINIR LOS CONJUNTOS B_v, V 
+        #FALTA DEFINIR LOS CONJUNTOS B_v
+
+        V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
+        rho_v = [1 - (v - self.minHeight)/(self.maxHeight - self.minHeight) for v in V]
+        B_v = []
+        for v in V:
+            numberOfBlocksBelowV = (self.openPitBlocksLengthLimits[3]*self.openPitBlocksWidthLimits[3])*((v-self.minHeight)/self.openPitBlocksHeightLimits[0])
+            blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if not numberOfBlocksBelowV == 0]
+            B_v.append(blocksBelowV)
+
+        #Restricciones del crown pillar
+
+        #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
+        w_v = integratedModel.addVars(V, vtype=GRB.BINARY, name="w")
+
+        #Restricciones del crown pillar
+        pillar_1 = integratedModel.addConstrs(gp.quicksum(x_bt[ti, b] for ti in self.t_C) <= 1 - w_v[v] for b in B_v[v] for v in range(len(V)))
+
+        pillar_2 = integratedModel.addConstrs(gp.quicksum(y_dt[d, ti] for d in self.drawpoint
+                                                        for ti in self.t_S) <= rho_v[v] * w_v[v] + (1 - w_v[v]) for v in range(len(V)))
+
+        ##FALTA DEFINIR LOS CONJUNTOS B_v, V
 
         #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
         #w_v = integratedModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.CONTINUOUS, name="w")
