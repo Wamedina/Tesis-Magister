@@ -80,6 +80,8 @@ class UndergroundModel:
         undergroundModel = gp.Model(name = 'Modelo Integrado')
         undergroundModel.Params.TimeLimit = 3600
 
+        # Underground  Model
+
         #14. Naturaleza de las variables
         x_dt = undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="x")
         y_dt = undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.CONTINUOUS, name="y")
@@ -102,7 +104,7 @@ class UndergroundModel:
                                 self.qU_dt[ti] * gp.quicksum(self.Q_d[d] * y_dt[d, ti] for d in self.drawpoint) for ti in self.t_S), "GQC_Up")
 
         GQC_low = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.LEY_D[d]*self.G_d[d] for d in self.drawpoint) >=
-                                self.qL_dt[ti] * gp.quicksum(self.Q_d[d]*y_dt[d, ti] for d in self.drawpoint) for ti in self.t_S), "GQC_low")
+                                self.qL_dt[ti] * gp.quicksum(self.Q_d[d] * y_dt[d, ti] for d in self.drawpoint) for ti in self.t_S), "GQC_low")
 
         #4. Todos los puntos de extracci ́on deben ser iniciados en el largo de la extracción
         Drawp_init = undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint), "Drawp_init")
@@ -141,11 +143,11 @@ class UndergroundModel:
                                                     "Drawpextract_66")
 
         #10. Existe una tasa m ́ınima de extracci ́on para cada drawpoint a extraer.
-        Drawpextract_67_1 = undergroundModel.addConstrs((self.RL_dt[ti] * z_dt[d, ti]  <= self.Q_d * y_dt[d, ti] for d in self.drawpoint
+        Drawpextract_67_1 = undergroundModel.addConstrs((self.RL_dt[ti] * z_dt[d, ti]  <=  y_dt[d, ti] for d in self.drawpoint
                                                         for ti in self.t_S), "Drawpextract_67_1")
 
         #11. La altura a extraer debe ser mayor a una cantidad m ́ınima.
-        rest_11 = undergroundModel.addConstrs((gp.quicksum(y_dt[d,ti] for ti in self.t_S)>= self.colHeight for d in self.drawpoint))
+        #rest_11 = undergroundModel.addConstrs((gp.quicksum(y_dt[d,ti] for ti in self.t_S)>= self.colHeight for d in self.drawpoint))
 
         #12. No podemos extraer más del 100 % de un drawpoint.
         Reserver_cnst = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint),
@@ -161,7 +163,6 @@ class UndergroundModel:
                                                     , "Drawpextract_65")
 
         
-
         #16. Restricción sobre el inicio de la extracci ́on de los drawpoints.
         DP_Sup = undergroundModel.addConstrs((gp.quicksum(x_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
                                     gp.quicksum(x_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
@@ -171,25 +172,6 @@ class UndergroundModel:
         restricion_z_dt = undergroundModel.addConstrs((gp.quicksum(z_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
                                     gp.quicksum(z_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
                                     for l in range(len(self.predecessor))), "DP_Sup")
-
-
-
-        
-        #Restricciones de partida.
-
-        ## El número de nuevos drawpoints debe tener un limite inferior respecto al origen
-        Drawpextract_64_3 = undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) <= self.NU_nt[0] for ti 
-                                                        in self.t_S)
-                                                        ,"Drawpextract_64_3")
-        restricion_partida_1 = undergroundModel.addConstr(x_dt[self.predecessor[0][0],0] == 1, "restriccion_partida 1")
-
-        ## Lo mínimo a extraer en el primer drawpoint es de 0.3 
-        restricion_partida_2 = undergroundModel.addConstr(y_dt[self.predecessor[0][0],0] >= 0.3, "restriccion_partida 2")
-        
-        ## Se debe extraer un mínimo de un 80% de cada drawpoint
-        #restricion_partida_E =undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*z_dt[d, ti] for ti in self.t_S) >= 0.8
-         #                                               for d in self.drawpoint), "Reserver_cnst")
-
         
         
         #Función objetivo

@@ -4,7 +4,7 @@ from globalFunctions import getNumberOfBlocksInADimension
 from openPitFunctions import finalBlock
 
 
-class OpenPitModel:
+class Subproblem:
    def __init__(self, database, numberOfPeriods):
       self.database = database
       self.numberOfPeriods = numberOfPeriods
@@ -70,61 +70,61 @@ class OpenPitModel:
 
    def openPitModel(self):#,w_opt):
     
-        openPitModel = gp.Model(name = 'Open Pit Model')
+      openPitModel = gp.Model(name = 'Open Pit Model')
 
-        #6. Naturaleza de variables
-        x_bt = openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.BINARY, name="x")
+      #6. Naturaleza de variables
+      x_bt = openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.CONTINUOUS, name="x")
 
-        #1. Restricci ́on sobre la cantidad de tonelaje m ́axima y m ́ınima a extraer en cada periodo.
-        Ton_Up  = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
-                                <= self.RMu_t[ti] for ti in self.t_C), "Ton_max")
-        Ton_low = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
-                                >= self.RMl_t[ti] for ti in self.t_C), "Ton_min")
+      #1. Restricci ́on sobre la cantidad de tonelaje m ́axima y m ́ınima a extraer en cada periodo.
+      Ton_Up  = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
+                              <= self.RMu_t[ti] for ti in self.t_C), "Ton_max")
+      Ton_low = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
+                              >= self.RMl_t[ti] for ti in self.t_C), "Ton_min")
 
-        #2. Restricci ́on sobre la cantidad de material m ́axima y m ́ınima a extraer en cada periodo.
-        Mat_Up_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) <= 
-                                self.RPu_t[ti] for ti in self.t_C), "Mat_max")
-        Mat_low_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) >= 
-                                self.RPl_t[ti] for ti in self.t_C), "Mat_min")
+      #2. Restricci ́on sobre la cantidad de material m ́axima y m ́ınima a extraer en cada periodo.
+      Mat_Up_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) <= 
+                              self.RPu_t[ti] for ti in self.t_C), "Mat_max")
+      Mat_low_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) >= 
+                              self.RPl_t[ti] for ti in self.t_C), "Mat_min")
 
-        #3. Restricci ́on de precedencia de los bloques a extraer, debemos extraer los 5 bloques superiores al bloque objetivo para sacar a este
-        BLOCK_SUP_OP = openPitModel.addConstrs((gp.quicksum(x_bt[s, self.predecessorBlock[l][0]]*(self.maxTimeOpenPit-s+1) for s in self.t_C) <= 
-                                        gp.quicksum(x_bt[s, self.predecessorBlock[l][1]]*(self.maxTimeOpenPit-s+1) for s in self.t_C)  
+      #3. Restricci ́on de precedencia de los bloques a extraer, debemos extraer los 5 bloques superiores al bloque objetivo para sacar a este
+      BLOCK_SUP_OP = openPitModel.addConstrs((gp.quicksum(x_bt[s, self.predecessorBlock[l][0]]*(self.maxTimeOpenPit-s+1) for s in self.t_C) <= 
+                                       gp.quicksum(x_bt[s, self.predecessorBlock[l][1]]*(self.maxTimeOpenPit-s+1) for s in self.t_C)  
                                     for l in range(len(self.predecessorBlock))), "Superior_Block")
 
-        #4. Restricci ́on sobre la ley m ́axima y m ́ınima por periodo.
-        GQC_Up_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) <=
-                            self.qu_t[ti] * gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) for ti in self.t_C), 
-                                "GQC_Up")
+      #4. Restricci ́on sobre la ley m ́axima y m ́ınima por periodo.
+      GQC_Up_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) <=
+                           self.qu_t[ti] * gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) for ti in self.t_C), 
+                              "GQC_Up")
 
-        GQC_low_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) >=
-                            self.ql_t[ti] * gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) for ti in self.t_C), 
-                                "GQC_LOW")
+      GQC_low_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) >=
+                           self.ql_t[ti] * gp.quicksum(x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) for ti in self.t_C), 
+                              "GQC_LOW")
 
-        #5. Podemos extraer el bloque en un solo periodo.
-        Reserve_cons_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b] for ti in self.t_C) <= 1 for b in self.openPitBlocks), 
-                                "Reserve_cons")
+      #5. Podemos extraer el bloque en un solo periodo.
+      Reserve_cons_OP = openPitModel.addConstrs((gp.quicksum(x_bt[ti, b] for ti in self.t_C) <= 1 for b in self.openPitBlocks), 
+                              "Reserve_cons")
 
-        #Función objetivo
-        FO_OP = gp.quicksum(x_bt[ti, b]*((((self.basePrice*self.openPitCopperLaw[b]-self.c_pbt[b])*self.o_b[b])-(self.c_mbt[b]*self.L_b[b]))/((1+self.desc)**self.t_C[ti]))
-                    for ti in self.t_C for b in self.openPitBlocks)
+      #Función objetivo
+      FO_OP = gp.quicksum(x_bt[ti, b]*((((self.basePrice*self.openPitCopperLaw[b]-self.c_pbt[b])*self.o_b[b])-(self.c_mbt[b]*self.L_b[b]))/((1+self.desc)**self.t_C[ti]))
+                  for ti in self.t_C for b in self.openPitBlocks)
 
-        ##FALTA DEFINIR LOS CONJUNTOS B_v, V 
+      ##FALTA DEFINIR LOS CONJUNTOS B_v, V 
 
-        #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
-        #w_v = openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.CONTINUOUS, name="w")
+      #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
+      #w_v = openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.CONTINUOUS, name="w")
 
-        #Restricciones del crown pillar
-        #pillar_2 = openPitModel.addConstrs(gp.quicksum(x_bt[ti, b] for b in self.B_v)<=1- w_v[v] for v in V for ti in self.t_C)
+      #Restricciones del crown pillar
+      #pillar_2 = openPitModel.addConstrs(gp.quicksum(x_bt[ti, b] for b in self.B_v)<=1- w_v[v] for v in V for ti in self.t_C)
 
-        #fixed_position = openPitModel.addConstrs(w_v == w_opt)
-        
-        openPitModel.setObjective(FO_OP, GRB.MAXIMIZE)
-        openPitModel.Params.MIPGap = 0.01
-        openPitModel.optimize()
-        lista_variable_Integrado = (openPitModel.getAttr(GRB.Attr.X, openPitModel.getVars()))
-        solucion = openPitModel.objVal
-        runtime = openPitModel.Runtime
-        gap_f = openPitModel.MIPGap
-        
-        return solucion, lista_variable_Integrado, runtime, gap_f
+      #fixed_position = openPitModel.addConstrs(w_v == w_opt)
+      
+      openPitModel.setObjective(FO_OP, GRB.MAXIMIZE)
+      openPitModel.Params.MIPGap = 0.01
+      openPitModel.optimize()
+      lista_variable_Integrado = (openPitModel.getAttr(GRB.Attr.X, openPitModel.getVars()))
+      solucion = openPitModel.objVal
+      runtime = openPitModel.Runtime
+      gap_f = 1#openPitModel.MIPGap
+      
+      return solucion, lista_variable_Integrado, runtime, gap_f

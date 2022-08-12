@@ -1,7 +1,7 @@
 import pandas as pd
 from integratedModel import IntegratedModel
 from MasterProblem import UndergroundModel
-from Subproblem import OpenPitModel
+from Subproblem import Subproblem
 
 class Main:
     def __init__(self, path, undergroundDatabaseName, openPitDatabaseName):
