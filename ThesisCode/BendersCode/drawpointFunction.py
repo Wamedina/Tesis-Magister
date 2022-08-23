@@ -75,7 +75,7 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
             aux += 1
     
     T_d_1 = []
-    Q_d_1 = []
+    Q_d_1 = []#Tonnelage of mineral
     q_d_1 = []
     c_pd_1 = []
     c_md_1 = []
@@ -116,7 +116,7 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
 
     T_d = []
     Q_d = []
-    q_d = []
+    q_d = [] #
     c_pd = []
     c_md = []
 

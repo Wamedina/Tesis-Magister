@@ -77,99 +77,100 @@ class UndergroundModel:
 
     def setUndergroundModel(self):#,v_p, theta_opt, w_opt):
                                 
-        undergroundModel = gp.Model(name = 'Modelo Integrado')
-        undergroundModel.Params.TimeLimit = 3600
+        self.undergroundModel = gp.Model(name = 'Modelo Integrado')
+        self.undergroundModel.Params.TimeLimit = 3600
 
         # Underground  Model
 
         #14. Naturaleza de las variables
-        x_dt = undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="x")
-        y_dt = undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.CONTINUOUS, name="y")
-        z_dt = undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="z")
+        x_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="x")
+        y_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.CONTINUOUS, name="y")
+        z_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="z")
+        theta = 1
 
         #1. Restricción sobre la cantidad de tonelaje máxima y mínima a extraer en cada periodo.
-        Ton_Up = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.G_d[d] for d in self.drawpoint) <= self.MU_mt[ti] for ti in self.t_S),
+        Ton_Up = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.G_d[d] for d in self.drawpoint) <= self.MU_mt[ti] for ti in self.t_S),
                                          "Min_max")
         
-        Ton_low = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.G_d[d] for d in self.drawpoint) >= self.ML_mt[ti] for ti in self.t_S),
+        Ton_low = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.G_d[d] for d in self.drawpoint) >= self.ML_mt[ti] for ti in self.t_S),
                                             "Min_min")
         #2. Restricción sobre la cantidad de material máxima y mínima a procesar en cada periodo.
-        Mat_Up = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]* self.Q_d[d] for d in self.drawpoint) <= self.MU_pt[ti] for ti in self.t_S),
+        Mat_Up = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]* self.Q_d[d] for d in self.drawpoint) <= self.MU_pt[ti] for ti in self.t_S),
                                             "Mat_max")
 
-        Mat_low = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]* self.Q_d[d] for d in self.drawpoint) >= self.ML_pt[ti] for ti in self.t_S)
+        Mat_low = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]* self.Q_d[d] for d in self.drawpoint) >= self.ML_pt[ti] for ti in self.t_S)
                                             , "Mat_min")
         #3. Rango de leyes máximas y mínimas a procesar
-        GQC_Up = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.LEY_D[d]*self.G_d[d] for d in self.drawpoint) <=
+        GQC_Up = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.LEY_D[d]*self.G_d[d] for d in self.drawpoint) <=
                                 self.qU_dt[ti] * gp.quicksum(self.Q_d[d] * y_dt[d, ti] for d in self.drawpoint) for ti in self.t_S), "GQC_Up")
 
-        GQC_low = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.LEY_D[d]*self.G_d[d] for d in self.drawpoint) >=
+        GQC_low = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.LEY_D[d]*self.G_d[d] for d in self.drawpoint) >=
                                 self.qL_dt[ti] * gp.quicksum(self.Q_d[d] * y_dt[d, ti] for d in self.drawpoint) for ti in self.t_S), "GQC_low")
 
         #4. Todos los puntos de extracci ́on deben ser iniciados en el largo de la extracción
-        Drawp_init = undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint), "Drawp_init")
+        Drawp_init = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint), "Drawp_init")
 
         #5. Los puntos de extracción deben ser activados al menos en el mismo periodo para que se inicie la extracción 
-        Drawpextract_61 = undergroundModel.addConstrs((gp.quicksum(x_dt[d, tau] for tau in range(ti+1)) >= z_dt[d, ti]  
+        Drawpextract_61 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, tau] for tau in range(ti+1)) >= z_dt[d, ti]  
                                             for d in self.drawpoint for ti in self.t_S), "Drawpextract_61")
 
 
         #6. Existe una cantidad máxima y mínima de drawpoints a abrir en cada periodo.
-        Drawpextract_64_1 = undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) <= self.NU_nt[ti] for ti 
+        Drawpextract_64_1 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) <= self.NU_nt[ti] for ti 
                                                         in self.t_S)
                                                         ,"Drawpextract_64_1")
 
-        Drawpextract_64_2 = undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) >= self.NL_nt[ti] for ti 
+        Drawpextract_64_2 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) >= self.NL_nt[ti] for ti 
                                                         in self.t_S)
                                                         , "Drawpextract_64_2")
 
         #7. Existe una m ́axima cantidad de drawpoints a extraer por periodo.
-        Drawpextract_65 = undergroundModel.addConstrs((gp.quicksum(z_dt[d, ti] for d in self.drawpoint) <= self.N_t[ti] for ti in self.t_S)
+        Drawpextract_65 = self.undergroundModel.addConstrs((gp.quicksum(z_dt[d, ti] for d in self.drawpoint) <= self.N_t[ti] for ti in self.t_S)
                                                     , "Drawpextract_65")
 
 
         #8. Si iniciamos la extracción de un drawpoint esta debe durar por su duraci ́on determinada.
         ## Un drawpoint solamente puede ser extraido por un preiodo pre determinado (A_d)
-        Drawpextract_62 = undergroundModel.addConstrs((gp.quicksum(z_dt[d, ti] for ti in self.t_S)  <= self.A_d[ti]  for d in self.drawpoint
+        Drawpextract_62 = self.undergroundModel.addConstrs((gp.quicksum(z_dt[d, ti] for ti in self.t_S)  <= self.A_d[ti]  for d in self.drawpoint
                                                     for ti in self.t_S), "Drawp_62")
 
         ## Una vez se inicia extrayendo de un drawpoint, se continua extrayendo sin interrupción
-        Drawpextract_63 = undergroundModel.addConstrs((self.A_d[ti] *(z_dt[d, ti] - z_dt[d, ti+1]) 
+        Drawpextract_63 = self.undergroundModel.addConstrs((self.A_d[ti] *(z_dt[d, ti] - z_dt[d, ti+1]) 
                                             - gp.quicksum(z_dt[d, tau] for tau in range(ti+1)) <= 0 
                                             for d in self.drawpoint for ti in range(0,max(self.t_S))), "Drawpextract_63")
 
         #9. Relación de variables, el porcentaje a extraer es 0 si no se extra un drawpoint.
-        Drawpextract_66 = undergroundModel.addConstrs((y_dt[d, ti] <= z_dt[d, ti] for d in self.drawpoint for ti in self.t_S),
+        Drawpextract_66 = self.undergroundModel.addConstrs((y_dt[d, ti] <= z_dt[d, ti] for d in self.drawpoint for ti in self.t_S),
                                                     "Drawpextract_66")
 
         #10. Existe una tasa m ́ınima de extracci ́on para cada drawpoint a extraer.
-        Drawpextract_67_1 = undergroundModel.addConstrs((self.RL_dt[ti] * z_dt[d, ti]  <=  y_dt[d, ti] for d in self.drawpoint
+        Drawpextract_67_1 = self.undergroundModel.addConstrs((self.RL_dt[ti] * z_dt[d, ti]  <=  y_dt[d, ti] for d in self.drawpoint
                                                         for ti in self.t_S), "Drawpextract_67_1")
 
         #11. La altura a extraer debe ser mayor a una cantidad m ́ınima.
-        #rest_11 = undergroundModel.addConstrs((gp.quicksum(y_dt[d,ti] for ti in self.t_S)>= self.colHeight for d in self.drawpoint))
+        #rest_11 = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d,ti] for ti in self.t_S)>= self.colHeight for d in self.drawpoint))
 
         #12. No podemos extraer más del 100 % de un drawpoint.
-        Reserver_cnst = undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint),
+        Reserver_cnst = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint),
                                                     "Reserver_cnst")
 
         #13. Si se activa un drawpoint, se extrae en ese periodo
-        rest_13 = undergroundModel.addConstrs(x_dt[d,ti] <= z_dt[d, ti] for d in self.drawpoint for ti in self.t_S)
+        rest_13 = self.undergroundModel.addConstrs(x_dt[d,ti] <= z_dt[d, ti] for d in self.drawpoint for ti in self.t_S)
 
         #14. Naturaleza de variables.
 
         #15. Existe una m ́axima cantidad de drawpoints a extraer por periodo.
-        rest_15= undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) <= self.N_t[ti] for ti in self.t_S)
+        rest_15= self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) <= self.N_t[ti] for ti in self.t_S)
                                                     , "Drawpextract_65")
 
         
         #16. Restricción sobre el inicio de la extracci ́on de los drawpoints.
-        DP_Sup = undergroundModel.addConstrs((gp.quicksum(x_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
+        DP_Sup = self.undergroundModel.addConstrs((gp.quicksum(x_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
                                     gp.quicksum(x_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
                                     for l in range(len(self.predecessor))), "DP_Sup")
 
         #17. Restricci ́on sobre la extracci ́on de los drawpoints.
-        restricion_z_dt = undergroundModel.addConstrs((gp.quicksum(z_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
+        restricion_z_dt = self.undergroundModel.addConstrs((gp.quicksum(z_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
                                     gp.quicksum(z_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
                                     for l in range(len(self.predecessor))), "DP_Sup")
         
@@ -185,25 +186,25 @@ class UndergroundModel:
         #Restricciones del crown pillar
 
         #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
-        w_v = undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="w")
+        w_v = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="w")
 
         #Restricciones del crown pillar
-        pillar_2 = undergroundModel.addConstrs(gp.quicksum(x_dt[d, ti] for d in D_v)<=1- w_v[v] for v in V for ti in self.t_S)
+        pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(x_dt[d, ti] for d in D_v)<=1- w_v[v] for v in V for ti in self.t_S)
 
-        pillar_3 = undergroundModel.addConstrs(gp.quicksum(w_v[v])==1 for v in V)
+        pillar_3 = self.undergroundModel.addConstrs(gp.quicksum(w_v[v])==1 for v in V)
 
         #Restricción extra para iterar
         if v_p < theta_opt - self.epsilon:
-            optimal_cut = undergroundModel.addConstrs(theta <= v_p + gp.quicksum(mu_v*(w_v[v]-w_opt[v])for v in V))
+            optimal_cut = self.undergroundModel.addConstrs(theta <= v_p + gp.quicksum(mu_v*(w_v[v]-w_opt[v])for v in V))
         """
        
-        undergroundModel.setObjective(undergroundObjectiveFunction, GRB.MAXIMIZE)
-        undergroundModel.Params.MIPGap = 0.01
+        self.undergroundModel.setObjective(undergroundObjectiveFunction, GRB.MAXIMIZE)
+        self.undergroundModel.Params.MIPGap = 0.01
         
-        undergroundModel.optimize()
-        lista_variable_Integrado = (undergroundModel.getAttr(GRB.Attr.X, undergroundModel.getVars()))
-        solucion = undergroundModel.objVal
-        runtime = undergroundModel.Runtime
-        gap_f = undergroundModel.MIPGap
+        self.undergroundModel.optimize()
+        lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
+        solucion = self.undergroundModel.objVal
+        runtime = self.undergroundModel.Runtime
+        gap_f = self.undergroundModel.MIPGap
         
         return solucion, lista_variable_Integrado, runtime, gap_f
