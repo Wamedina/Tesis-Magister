@@ -2,9 +2,10 @@ import gurobipy   as     gp
 from   gurobipy   import GRB
 from drawpointFunction  import drawpointFunction
 from globalFunctions import getNumberOfBlocksInADimension
+from itertools import chain
 
 
-class UndergroundModel:
+class MasterProblem:
     #Underground Model + Crown Pillar Restrictions.
     def __init__(self, database, numberOfPeriods):
         self.database = database
@@ -21,14 +22,13 @@ class UndergroundModel:
         self.epsilon = 1
         self.orientationToExtractTheDrawpoints = 0
 
-    def execute(self):
+    def setParameters(self):
         self.getUndergroundVariablesFromCSV()
         self.getUndergroundInfo()
         self.setUndergroundParameters()
         self.setUndergroundMineLimits()
         self.setUndergroundVariables()
-        self.setModelandGetResults()
-        return self.objValue, self.variableValues, self.runtime, self.gap
+
     
     def getUndergroundVariablesFromCSV(self):
         self.undergroundBlocksLenght = self.database['X'].to_dict()             
@@ -50,14 +50,14 @@ class UndergroundModel:
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
         self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 17204400.0  for period in range(self.numberOfPeriods)}
+        self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
         self.MU_pt = {period : 17777880.0   for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 17204400.0 for period in range(self.numberOfPeriods)}
+        self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
         self.NU_nt = {period : 59 for period in range(self.numberOfPeriods)} 
-        self.NL_nt = {period : 32 for period in range(self.numberOfPeriods)}
+        self.NL_nt = {period : 0 for period in range(self.numberOfPeriods)}
         self.N_t   = {period : 57* (1 + period) for period in range(self.numberOfPeriods)}
         self.RL_dt = {period : 0.3 for period in range(self.numberOfPeriods)}
         self.RU_dt = {period : 0.7 for period in range(self.numberOfPeriods)}
@@ -75,7 +75,16 @@ class UndergroundModel:
     def setModelandGetResults(self):
         self.objValue, self.variableValues, self.runtime, self.gap = self.setUndergroundModel()#v_p, theta_opt, w_opt)
 
-    def setUndergroundModel(self):#,v_p, theta_opt, w_opt):
+    def addThetaRestriction(self, subProblemObjValue, estimatedW_v, pi_vb):
+        self.B_v = {}
+        for v in self.V:
+            numberOfBlocksBelowV = (self.openPitBlocksLengthLimits[3]*self.openPitBlocksWidthLimits[3])*((v-self.minHeight)/self.openPitBlocksHeightLimits[0])
+            blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if not numberOfBlocksBelowV == 0]
+            self.B_v[v] = blocksBelowV
+
+        self.thetaRestriction = self.undergroundModel.addConstr(self.theta <= subProblemObjValue + gp.quicksum(gp.quicksum((self.w_v[v]-estimatedW_v[v]) * pi_vb[b] for b in self.B_v) for v in self.V))
+
+    def optimize(self):#,v_p, theta_opt, w_opt):
                                 
         self.undergroundModel = gp.Model(name = 'Modelo Integrado')
         self.undergroundModel.Params.TimeLimit = 3600
@@ -86,7 +95,7 @@ class UndergroundModel:
         x_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="x")
         y_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.CONTINUOUS, name="y")
         z_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="z")
-        theta = 1
+        
 
         #1. Restricción sobre la cantidad de tonelaje máxima y mínima a extraer en cada periodo.
         Ton_Up = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti]*self.G_d[d] for d in self.drawpoint) <= self.MU_mt[ti] for ti in self.t_S),
@@ -179,25 +188,23 @@ class UndergroundModel:
         undergroundObjectiveFunction = gp.quicksum(y_dt[d, ti]*((((self.p_t * self.LEY_D[d] -self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
                                         ((1+self.desc)**(self.t_S[ti]))) for ti in self.t_S for d in self.drawpoint)
         
-        """
-        #FALTA DEFINIR LOS CONJUNTOS D_v, V
+        #Conjuntos para el crown pillar
 
-        
         #Restricciones del crown pillar
-
         #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
-        w_v = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="w")
+        self.w_v = self.undergroundModel.addVars(self.V, vtype=GRB.BINARY, name="w")
+        self.theta = self.undergroundModel.addVar(name="theta")
 
-        #Restricciones del crown pillar
-        pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(x_dt[d, ti] for d in D_v)<=1- w_v[v] for v in V for ti in self.t_S)
 
-        pillar_3 = self.undergroundModel.addConstrs(gp.quicksum(w_v[v])==1 for v in V)
-
-        #Restricción extra para iterar
-        if v_p < theta_opt - self.epsilon:
-            optimal_cut = self.undergroundModel.addConstrs(theta <= v_p + gp.quicksum(mu_v*(w_v[v]-w_opt[v])for v in V))
-        """
+        pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(y_dt[d, ti] for d in self.drawpoint
+                                                        for ti in self.t_S) <= self.rho_v[v] * self.w_v[v] + (1 - self.w_v[v]) for v in self.V)
        
+        pillar_3 = self.undergroundModel.addConstr(gp.quicksum(self.w_v[v] for v in self.V) == 1)
+
+        theta_restriction_1 = self.undergroundModel.addConstr(-gp.GRB.INFINITY <= self.theta)
+        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 1000000000)
+
+
         self.undergroundModel.setObjective(undergroundObjectiveFunction, GRB.MAXIMIZE)
         self.undergroundModel.Params.MIPGap = 0.01
         
@@ -207,4 +214,4 @@ class UndergroundModel:
         runtime = self.undergroundModel.Runtime
         gap_f = self.undergroundModel.MIPGap
         
-        return solucion, lista_variable_Integrado, runtime, gap_f
+        return self.w_v, self.theta
