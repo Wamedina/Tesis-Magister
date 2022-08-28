@@ -123,17 +123,9 @@ class SubProblem:
       FO_OP = gp.quicksum(self.x_bt[ti, b]*((((self.basePrice*self.openPitCopperLaw[b]-self.c_pbt[b])*self.o_b[b])-(self.c_mbt[b]*self.L_b[b]))/((1+self.desc)**self.t_C[ti]))
                   for ti in self.t_C for b in self.openPitBlocks)
 
-      ##FALTA DEFINIR LOS CONJUNTOS B_v, V 
-      heightRestriction = self.openPitModel.addConstrs(gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v]  for v in range(len(self.V)) for b in self.B_v[self.V[v]])
+      self.heightRestriction = self.openPitModel.addConstrs(gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v]  for v in range(len(self.V)) for b in self.B_v[self.V[v]])
       
 
-      #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
-      #w_v = self.openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.CONTINUOUS, name="w")
-
-      #Restricciones del crown pillar
-      #pillar_2 = self.openPitModel.addConstrs(gp.quicksum(self.x_bt[ti, b] for b in self.B_v)<=1- w_v[v] for v in V for ti in self.t_C)
-
-      #fixed_position = self.openPitModel.addConstrs(w_v == w_opt)
       
       self.openPitModel.setObjective(FO_OP, GRB.MAXIMIZE)
       self.openPitModel.Params.MIPGap = 0.01

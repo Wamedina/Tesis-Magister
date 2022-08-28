@@ -50,14 +50,14 @@ class MasterProblem:
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
         self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
+        self.ML_mt = {period : 17204400.0  for period in range(self.numberOfPeriods)}
         self.MU_pt = {period : 17777880.0   for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
+        self.ML_pt = {period : 17204400.0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
         self.NU_nt = {period : 59 for period in range(self.numberOfPeriods)} 
-        self.NL_nt = {period : 0 for period in range(self.numberOfPeriods)}
+        self.NL_nt = {period : 32 for period in range(self.numberOfPeriods)}
         self.N_t   = {period : 57* (1 + period) for period in range(self.numberOfPeriods)}
         self.RL_dt = {period : 0.3 for period in range(self.numberOfPeriods)}
         self.RU_dt = {period : 0.7 for period in range(self.numberOfPeriods)}
@@ -76,18 +76,13 @@ class MasterProblem:
         self.objValue, self.variableValues, self.runtime, self.gap = self.setUndergroundModel()#v_p, theta_opt, w_opt)
 
     def addThetaRestriction(self, subProblemObjValue, estimatedW_v, pi_vb):
-        self.B_v = {}
-        for v in self.V:
-            numberOfBlocksBelowV = (self.openPitBlocksLengthLimits[3]*self.openPitBlocksWidthLimits[3])*((v-self.minHeight)/self.openPitBlocksHeightLimits[0])
-            blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if not numberOfBlocksBelowV == 0]
-            self.B_v[v] = blocksBelowV
+        self.undergroundModel.addConstr(self.theta <= subProblemObjValue + gp.quicksum(gp.quicksum((self.w_v[v]-estimatedW_v[v]) * pi_vb[b] for b in self.B_v) for v in self.V))
 
-        self.thetaRestriction = self.undergroundModel.addConstr(self.theta <= subProblemObjValue + gp.quicksum(gp.quicksum((self.w_v[v]-estimatedW_v[v]) * pi_vb[b] for b in self.B_v) for v in self.V))
-
-    def optimize(self):#,v_p, theta_opt, w_opt):
+    def setModel(self):#,v_p, theta_opt, w_opt):
                                 
         self.undergroundModel = gp.Model(name = 'Modelo Integrado')
         self.undergroundModel.Params.TimeLimit = 3600
+        self.undergroundModel.Params.OutputFlag = 0
 
         # Underground  Model
 
@@ -184,16 +179,14 @@ class MasterProblem:
                                     for l in range(len(self.predecessor))), "DP_Sup")
         
         
-        #Función objetivo
-        undergroundObjectiveFunction = gp.quicksum(y_dt[d, ti]*((((self.p_t * self.LEY_D[d] -self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
-                                        ((1+self.desc)**(self.t_S[ti]))) for ti in self.t_S for d in self.drawpoint)
+       
         
         #Conjuntos para el crown pillar
 
         #Restricciones del crown pillar
         #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
         self.w_v = self.undergroundModel.addVars(self.V, vtype=GRB.BINARY, name="w")
-        self.theta = self.undergroundModel.addVar(name="theta")
+        self.theta = self.undergroundModel.addVar(vtype=GRB.CONTINUOUS,name="theta")
 
 
         pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(y_dt[d, ti] for d in self.drawpoint
@@ -202,16 +195,20 @@ class MasterProblem:
         pillar_3 = self.undergroundModel.addConstr(gp.quicksum(self.w_v[v] for v in self.V) == 1)
 
         theta_restriction_1 = self.undergroundModel.addConstr(-gp.GRB.INFINITY <= self.theta)
-        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 1000000000)
+        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 800000000)
 
+         #Función objetivo
+        undergroundObjectiveFunction = gp.quicksum(self.theta + y_dt[d, ti]*((((self.p_t * self.LEY_D[d] -self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
+                                        ((1+self.desc)**(self.t_S[ti]))) for ti in self.t_S for d in self.drawpoint) 
 
         self.undergroundModel.setObjective(undergroundObjectiveFunction, GRB.MAXIMIZE)
         self.undergroundModel.Params.MIPGap = 0.01
-        
+
+    def optimize(self):
         self.undergroundModel.optimize()
         lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
         solucion = self.undergroundModel.objVal
         runtime = self.undergroundModel.Runtime
         gap_f = self.undergroundModel.MIPGap
         
-        return self.w_v, self.theta
+        return {key:value.X for key,value in zip(self.w_v, self.w_v.values())}, self.theta
