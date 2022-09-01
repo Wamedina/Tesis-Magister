@@ -50,14 +50,14 @@ class MasterProblem:
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
         self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 17204400.0  for period in range(self.numberOfPeriods)}
+        self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
         self.MU_pt = {period : 17777880.0   for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 17204400.0 for period in range(self.numberOfPeriods)}
+        self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
         self.NU_nt = {period : 59 for period in range(self.numberOfPeriods)} 
-        self.NL_nt = {period : 32 for period in range(self.numberOfPeriods)}
+        self.NL_nt = {period : 0 for period in range(self.numberOfPeriods)}
         self.N_t   = {period : 57* (1 + period) for period in range(self.numberOfPeriods)}
         self.RL_dt = {period : 0.3 for period in range(self.numberOfPeriods)}
         self.RU_dt = {period : 0.7 for period in range(self.numberOfPeriods)}
@@ -198,7 +198,7 @@ class MasterProblem:
         theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 800000000)
 
          #Función objetivo
-        undergroundObjectiveFunction = gp.quicksum(self.theta + y_dt[d, ti]*((((self.p_t * self.LEY_D[d] -self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
+        undergroundObjectiveFunction = self.theta + gp.quicksum( y_dt[d, ti]*((((self.p_t * self.LEY_D[d] -self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
                                         ((1+self.desc)**(self.t_S[ti]))) for ti in self.t_S for d in self.drawpoint) 
 
         self.undergroundModel.setObjective(undergroundObjectiveFunction, GRB.MAXIMIZE)
