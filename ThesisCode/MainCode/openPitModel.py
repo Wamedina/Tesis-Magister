@@ -1,7 +1,7 @@
 import gurobipy   as     gp
 from   gurobipy   import GRB
 from globalFunctions import getNumberOfBlocksInADimension
-from openPitFunctions import finalBlock
+from openPitFunctions import predecessorBlocks
 
 
 class OpenPitModel:
@@ -60,7 +60,7 @@ class OpenPitModel:
 
    def setPredecessorBlock(self):
         predecessorBlock = []
-        superiorBlock = finalBlock(self.openPitBlocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
+        superiorBlock = predecessorBlocks(self.openPitBlocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
         for i in range(len(self.openPitBlocks)):
             for j in superiorBlock[i]:
                 aux_1 = []

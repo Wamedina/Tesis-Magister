@@ -1,6 +1,6 @@
 import pandas as pd
 from openPitModel import *
-from openPitFunctions import finalBlock
+from openPitFunctions import predecessorBlocks
 from drawpointFunction  import drawpointFunction
 from integratedModel   import setIntegratedModel
 from globalFunctions import getNumberOfBlocksInADimension
@@ -85,7 +85,7 @@ class Main:
     
     def setPredecessorBlock(self):
         predecessorBlock = []
-        superiorBlock = finalBlock(self.CA_blocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
+        superiorBlock = predecessorBlocks(self.CA_blocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
         for i in range(len(self.CA_blocks)):
             for j in superiorBlock[i]:
                 aux_1 = []

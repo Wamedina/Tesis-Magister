@@ -3,7 +3,7 @@ import gurobipy   as     gp
 from   gurobipy   import GRB
 from globalFunctions import getNumberOfBlocksInADimension
 from openPitModel import *
-from openPitFunctions import finalBlock
+from openPitFunctions import predecessorBlocks
 from globalFunctions import getNumberOfBlocksInADimension
 from plotResults   import plotResults
 from drawpointFunction  import drawpointFunction
@@ -112,7 +112,7 @@ class IntegratedModel:
 
     def setPredecessorBlock(self):
         predecessorBlock = []
-        superiorBlock = finalBlock(self.CA_blocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
+        superiorBlock = predecessorBlocks(self.CA_blocks, self.openPitBlocksLenghtLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
         for i in range(len(self.CA_blocks)):
             for j in superiorBlock[i]:
                 aux_1 = []

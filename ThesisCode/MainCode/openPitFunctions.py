@@ -8,7 +8,7 @@ def superiorBlock(blockIndex,numberOfBlocksInLenght,numberOfBlocksInWidth):
     return [topBlockCenter,topBlockLeft,topBlockRight,topBlockDown,topBlockUp]
 
 
-def finalBlock(bloques_usados, limites_x_C, limites_y_C, limites_z_C): #Este es el bloque que conseguimos a través de las restricciones?
+def predecessorBlocks(bloques_usados, limites_x_C, limites_y_C, limites_z_C): #Este es el bloque que conseguimos a través de las restricciones?
     block_sup = []*len(bloques_usados)
     for i in bloques_usados:
         aux = []
