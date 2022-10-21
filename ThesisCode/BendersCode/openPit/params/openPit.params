@@ -1,0 +1,79 @@
+USE_DISPLAY: 0
+ 
+                  WRITE.LP.SOLUTION: 0
+
+                  WRITE.IP.SOLUTION: 1
+
+                  CPIT: 1
+
+                  PP.ULTIMATE_PIT: 1
+
+                  PP.FORCE_UPIT: 1
+
+                  PP.EARLY_START: 1
+
+                  PP.WASTE_OPTION: 1
+
+                  PP.ELIM_NULL: 0
+
+                  PP.TRANSITIVE_REDUCTION: 0
+
+                  AG.USE_BLOCK_AGGREGATION: 0
+
+                  AG.BLOCK_AGGREGATION: 1.0
+
+                  OPTMETHOD: 0
+
+                  CG.ONE_DESTINATION: 1
+
+                  CG.IMPLICIT: 0
+
+                  CG.USE_DISPLAY: 1
+
+                  CG.MAX_ITER: -1
+
+                  CG.TARGET_GAP: 0.0001
+
+                  CG.MAX_TIME: -1
+
+                  CG.USE_KSTEP: 0
+
+                  CG.KSTEP_K: 10
+
+                  CG.MASTER_NTHREADS: 4
+
+                  HE.TOPOSORT: 1
+
+                  HE.FTOPOSORT: 0
+
+                  HE.NALPHA_POINTS: 50
+
+                  HE.OPT_DESTINATIONS: 1
+
+                  HE.NAIVE: 0
+
+                  HE.NAIVE_INTSOLLIM: 1000
+
+                  HE.NAIVE_EPGAP: 0.01
+
+                  HE.NAIVE_TILIM: 14400
+
+                  CP.DYNAMIC_CUTS: 0
+
+                  CP.CLIQUES: 0
+
+                  CP.MINW: 0
+
+                  CP.DELAYED_PRECEDENCES: 0
+
+                  CONSTRAINT_PROGRAMMING: 0
+
+                  CPROG.GAP_LIMIT: 0.01
+
+                  CPROG.CP_TIME_LIMIT: 28800
+
+                  CPROG.EX_TIME_LIMIT: 28800
+
+                  CPROG.HOT_START: 1
+
+                  CPROG.NTHREADS: 8
