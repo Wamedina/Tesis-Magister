@@ -1,0 +1,339 @@
+Running OMP version: master 1.8.4 bf856556 2022-08-12 13:50:47 -0400
+Invoked using: bin/OMP_SOLVER_C1290 /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/files/openPit.blocks /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/files/openPit.prec /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/files/openPit.prob /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/params/openPit.params
+license to sign [DEFAULTclient-signatureAFhG-4bsA-AAA=lic_ver200valid-to2023-03-07]
+LICENSE OK!
+BLOCKS FILE: /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/files/openPit.blocks
+PREC FILE: /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/files/openPit.prec
+PROB FILE: /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/files/openPit.prob
+PARAMS FILE: /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/params/openPit.params
+OR Solver: key created. The key is: openPit_openPit_openPit
+STATS_INPUT_NAME openPit_openPit_openPit
+wrong number of parameters for WRITE.LP.SOLUTION in load_params (/home/nloira/projects/OMP/code/src/solvers_btd.c:939)
+OR Solver: loaded params (params file) OK.
+STATS_PARAM_STOCHASTIC_MODE 0
+Objective: NPV
+DURATION loaded from column 2.
+Loaded prob file OK.
+Loaded block file columns OK.
+Vars and Prob populated OK.
+Block memory allocated OK.
+Block information in VARS populated OK.
+Bin information in VARS populated OK.
+dbldata OK.
+intdata OK.
+stockpiles OK.
+objfunction OK.
+objcols OK.
+Cleanup OK.
+OR Solver: loaded problem (prob and block files) OK.
+NNODES = 11760
+OR Solver: created arcs.
+STATS_INPUT_LOAD_TIME 0.009107
+EARLY START / TMIN PROPAGATION ELIMINATED 0 TIME PERIODS
+No bins eliminated due to propagation.
+
+****************************
+ACTIVATED FEATURES: 
+****************************
+USE INPUT SOLUTION      : No 
+USE PREPROCESSING       : Yes
+USE AGGREGATION         : No 
+USE CUTTING PLANES      : No 
+USE PRECOMPUTED COLUMNS : No 
+SOLVE LP RELAXATION     : Yes
+USE HEURISTICS          : Yes
+USE BRANCH-AND-BOUND    : No 
+****************************
+
+************************ INPUT DATA TESTING ************************
+
+RRCNT = 6
+
+INPUT DATA:
+
+nblocks=11760, nbins=11760, nperiods=5, ndestinations=1, nyvars=0, avg_nblockperiods=5.0, avg_nblockdestinations=1.0,  avg_nblocksinbin=1.0, narcs=53312,
+discount_rate=0.100000, rowcnt=6, sink_rate=0, phase_rate=0, max_open_benches=-1, nscenarios=0
+natvars (nidx) = 58800
+STATS_INPUT_NBLOCKS 11760
+STATS_INPUT_NBINS 11760
+STATS_INPUT_NPERIODS 5
+STATS_INPUT_SCENARIOS 0
+STATS_INPUT_NXVARS 58800
+STATS_INPUT_NYVARS 58800
+STATS_INPUT_NARCS 53312
+STATS_DISCOUNT_RATE 0.100000
+
+Done with input data testing in 0.000722 seconds. Time elapsed: 0.000727 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:277)
+
+************************** PRE-PROCESSING **************************
+
+PP-ITERATION: 1
+ULTIMATE-PIT = Yes.
+    Problem qualifies for UPIT = No . in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:484)
+    Number of bins eliminated = 0. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:485)
+STATS_PPITER_UPIT_NBINS_REMOVED 0
+STATS_PPITER_UPIT_NXVARS_REMOVED 0
+WASTE-OPTION = No .
+CAPACITY EARLY STARTS = Yes.
+    Number of bins eliminated = 5168. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:576)
+    Number of additional bin-periods eliminated = 6840. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:577)
+STATS_PPITER_EARLYSTARTS_NXVARS_REMOVED 32680
+STATS_PPITER_EARLYSTARTS_NYVARS_REMOVED 32680
+REMOVE NULL BINS = No .
+TRANSITIVE_REDUCTION = No .
+PP-ITERATION: 2
+ULTIMATE-PIT = Yes.
+    Problem qualifies for UPIT = No . in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:484)
+    Number of bins eliminated = 0. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:485)
+STATS_PPITER_UPIT_NBINS_REMOVED 0
+STATS_PPITER_UPIT_NXVARS_REMOVED 0
+WASTE-OPTION = No .
+CAPACITY EARLY STARTS = Yes.
+    Number of bins eliminated = 0. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:576)
+    Number of additional bin-periods eliminated = 0. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:577)
+STATS_PPITER_EARLYSTARTS_NXVARS_REMOVED 0
+STATS_PPITER_EARLYSTARTS_NYVARS_REMOVED 0
+REMOVE NULL BINS = No .
+TRANSITIVE_REDUCTION = No .
+STATS_PP_NITERATIONS 2
+STATS_PP_UPIT_NBINS_REMOVED 0
+STATS_PP_UPIT_NXVARS_REMOVED 0
+STATS_PP_EARLYSTARTS_NXVARS_REMOVED 32680
+STATS_PP_EARLYSTARTS_NYVARS_REMOVED 32680
+STATS_PP_MODEELIMINATION_NYVARS_REMOVED 0
+STATS_PP_NULLBINS_NXVARS_REMOVED 0
+STATS_PP_NULLBINS_NYVARS_REMOVED 0
+STATS_PP_NULLBINS_NARCS_ADDED 0
+STATS_PP_TRANSITIVEREDUCTION_NARCS_REMOVED 0
+STATS_PP_NXVARS_REMOVED 32680
+STATS_PP_NYVARS_REMOVED 32680
+STATS_PP_NARCS_REMOVED 25256
+STATS_PP_TIME 0.022194
+
+Done with preprocessing in 0.023472 seconds Time elapsed: 0.024201 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:705)
+
+*************************** AGGREGATION ****************************
+
+BLOCK_AGGREGATION = No .
+
+Done with aggregation in 0.000001 seconds. Time elapsed: 0.024203 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:750)
+
+******************* INITIALIZING DATA STRUCTURES *******************
+
+RRCNT = 6
+BY-LP problem created. It has 26120 variables, 126648 precedence constraints, 30 resource constraints and 119902 non-zero coefficients in the resource constraints. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:867)
+
+PREPROCESSED AND AGGREGATED DATA:
+
+nblocks=6592, nbins=6592, nperiods=5, ndestinations=1, nyvars=0, avg_nblockperiods=4.0, avg_nblockdestinations=1.0,  avg_nblocksinbin=1.0, narcs=28056,
+discount_rate=0.100000, rowcnt=6, sink_rate=0, phase_rate=0, max_open_benches=-1, nscenarios=0
+natvars (nidx) = 26120
+
+Done with input data testing in 0.005184 seconds. Time elapsed: 0.029388 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:891)
+
+********************* ANALYZING INPUT SOLUTION *********************
+
+There is no input solution
+
+Done with input solution analysis in 0.000001 seconds. Time elapsed: 0.029391 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1020)
+
+*********************** PRECOMPUTING COLUMNS ***********************
+
+CPIT starting-solution: No 
+Starting with trivial partition.
+
+Done with hot start columns in 0.000009 seconds. Time elapsed: 0.029401 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1093)
+
+************************ PRECOMPUTING CUTS *************************
+
+Not using cuts
+
+Done with cuts in 0.000001 seconds. Time elapsed: 0.029403 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1213)
+
+***************************** LP-SOLVE *****************************
+
+OPTIMIZATION method: Bienstock-Zuckerberg.
+
+|-----+-----------+---------------------+--------------------+-----------+-----------+-----------+-----------+-----------+------------|
+| BIENSTOCK-ZUCKERBERG ALGORITHM: Target gap = 1.00e-04.  Target eps = 1.00e-06.  Starting phase = Phase  I.                          |
+| Number of variables: tot = 26150, x = 26120, y = 0, s = 30, Use step = 0 (25), kstep = 0, lstep = 0, xstep = 0 (-1)
+|-----+-----------+---------------------+--------------------+-----------+-----------+-----------+-----------+-----------+------------|
+|Iter.|#Part.     |    Primal Value     |  Lagrangian Value  |    Gap    | Pri. Time | Mas. Time | Tot. Time | Pri. Eps. |   Kappa    |
+|-----+-----------+---------------------+--------------------+-----------+-----------+-----------+-----------+-----------+------------|
+|   1 |    2   31 |            Phase  I |      1.0516447e+09 |  1.00e+00 |   0.00142 |   0.00283 |   0.00448 |  8.32e+06 |     4.7463 |
+|   2 |    4   35 |            Phase IB |      5.3147796e+17 |  1.10e+07 |   0.00326 |   0.00364 |   0.00727 |  8.32e+06 |     16.812 |
+|   3 |    8   42 |            Phase IB |      4.1644293e+12 |  1.40e+02 |   0.00471 |    0.0046 |   0.00974 |  7.32e+06 |     20.384 |
+|   4 |   14   55 |            Phase IB |      3.7807384e+12 |  3.78e+12 |    0.0066 |    0.0054 |    0.0125 |  3.73e-09 |     39.321 |
+|   5 |   14   55 |       4.3992851e+08 |      1.0516447e+09 |  1.39e+00 |   0.00824 |   0.00631 |    0.0151 |  0.00e+00 |     53.628 |
+|   6 |   22   80 |       5.2905569e+08 |      1.0516447e+09 |  9.88e-01 |    0.0107 |   0.00735 |    0.0188 |  7.45e-09 |     228.35 |
+|   7 |   30  109 |       6.2819595e+08 |      7.3456701e+08 |  1.69e-01 |    0.0121 |   0.00839 |    0.0212 |  9.31e-09 |     221.98 |
+|   8 |   39  154 |       6.7572484e+08 |      7.3456701e+08 |  8.71e-02 |    0.0136 |   0.00929 |    0.0237 |  3.35e-09 |     187.42 |
+|   9 |   54  238 |       6.8180009e+08 |      6.8552193e+08 |  5.46e-03 |    0.0153 |    0.0108 |    0.0269 |  1.16e-09 |     183.67 |
+|  10 |   58  256 |       6.8230233e+08 |      6.8386295e+08 |  2.29e-03 |    0.0164 |    0.0121 |    0.0294 |  2.18e-09 |     261.02 |
+|  11 |   67  299 |       6.8246822e+08 |      6.8370902e+08 |  1.82e-03 |    0.0178 |    0.0138 |    0.0326 |  1.28e-08 |     138.25 |
+|  12 |   71  320 |       6.8271727e+08 |      6.8340451e+08 |  1.01e-03 |    0.0191 |    0.0154 |    0.0355 |  1.19e-09 |     420.84 |
+|  13 |   73  337 |       6.8278873e+08 |      6.8313809e+08 |  5.12e-04 |    0.0201 |    0.0169 |    0.0381 |  3.20e-09 |     460.24 |
+|  14 |   82  373 |       6.8284322e+08 |      6.8307869e+08 |  3.45e-04 |    0.0213 |    0.0185 |    0.0409 |  2.71e-09 |     217.82 |
+|  15 |   85  389 |       6.8288634e+08 |        6.82998e+08 |  1.64e-04 |    0.0222 |    0.0201 |    0.0435 |  5.59e-09 |     526.71 |
+|  16 |   87  400 |       6.8291159e+08 |      6.8295506e+08 |  6.37e-05 |    0.0233 |    0.0218 |    0.0463 |  1.53e-09 |     196.07 |
+|-----+-----------+---------------------+--------------------+-----------+-----------+-----------+-----------+-----------+------------|
+*  16 |   87  400 |       6.8291159e+08 |      6.8295506e+08 |  6.37e-05 |    0.0233 |    0.0218 |    0.0463 |   1.5e-09 |     196.07 | OMP_OPTIMAL
+|-----+-----------+---------------------+--------------------+-----------+-----------+-----------+-----------+-----------+------------|
+STATS_BZ_NITERATIONS 16
+STATS_BZ_SOLVETIME 0.047057
+STATS_BZ_PRICINGTIME 0.023279
+STATS_BZ_MASTERTIME 0.021833
+STATS_BZ_NPARTITIONS 87
+STATS_NCUTS 0
+STATS_NCUT_ROUNDS 0
+
+
+          |------------------------------------------------------------|
+          |       BZ SOLUTION QUALITY INFORMATION                      |
+          |------------------------------------------------------------|
+          |                                | PP-AGG Sol  |  Orig Sol   |
+          |--------------------------------+-------------+-------------|
+          | Const. violation (max 3.0e+05) |  3.5390e-08 |  3.5390e-08 |
+          | Prec violation   (max 1.0e-05) |  0.0000e+00 |  0.0000e+00 |
+          | Bounds violation (max 1.0e-05) |  0.0000e+00 |  0.0000e+00 |
+          | Is Feasible?                   |     Yes     |     Yes     |
+          |--------------------------------+-------------+-------------|
+          | W. Int. Viol.    (max 1.0e-02) |  4.4248e-01 |  4.4248e-01 |
+          | S. Int. Viol.    (max 1.0e-02) |  4.4248e-01 |  4.4248e-01 |
+          | Is Integer (weak)?             |     No      |     No      |
+          | Is Integer (strong)?           |     No      |     No      |
+          |--------------------------------+-------------+-------------|
+          | Objective Value                |  6.8291e+08 |  6.8291e+08 |
+          |--------------------------------+-------------+-------------|
+          | Best Previous LP Solution      |-1.7977e+308 |-1.7977e+308 |
+          | Replace Best LP Solution?      |     Yes     |     Yes     |
+          |------------------------------------------------------------|
+          | Best Previous IP Solution      |-1.7977e+308 |-1.7977e+308 |
+          | Replace Best IP Solution?      |     No      |     No      |
+          |------------------------------------------------------------|
+
+          |------+------------------+---------+---------|
+          |  t   |    Objval[t]     | Perc[t] |  Acc[t] | 
+          |------+------------------+---------+---------|
+          |    0 |   168733679.2231 |  24.71% |  24.71% |
+          |    1 |   167808136.3525 |  24.57% |  49.28% |
+          |    2 |   150412275.8684 |  22.03% |  71.31% |
+          |    3 |   116875920.0159 |  17.11% |  88.42% |
+          |    4 |    79081574.2240 |  11.58% | 100.00% |
+          |------+------------------+---------+---------|
+          | tot  |   682911585.6839 | 100.00% | 100.00% |
+          |------+------------------+---------+---------|
+
+
+|-----+--------------------------------+--------------------------------+--------------------------------|
+|  t  |         CONSTRAINT:  0         |         CONSTRAINT:  1         |         CONSTRAINT:  2         |
+|-----+--------------------------------+--------------------------------+--------------------------------|
+|   0 |   13219200.00 <=   13219200.00 |   13219200.00 >=    8812800.00 |   10933380.00 <=   10933380.00 |
+|   1 |   13219200.00 <=   13219200.00 |   13219200.00 >=    8812800.00 |   10933380.00 <=   10933380.00 |
+|   2 |   13219200.00 <=   13219200.00 |   13219200.00 >=    8812800.00 |   10933380.00 <=   10933380.00 |
+|   3 |   13219200.00 <=   13219200.00 |   13219200.00 >=    8812800.00 |    9143588.57 <=   10933380.00 |
+|   4 |   13219200.00 <=   13219200.00 |   13219200.00 >=    8812800.00 |    7064889.43 <=   10933380.00 |
+|-----+--------------------------------+--------------------------------+--------------------------------|
+
+
+
+Done with solving LP relaxation in 0.054332 seconds. Time elapsed: 0.083736 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1553)
+
+***************************** TOPOSORT *****************************
+
+TOPOSORT: Problem has all knapsack constraints. Proceeding with toposort algorithms.
+TOPOSORT: Use binary toposort = Yes.
+TOPOSORT: Use fractional toposort = No .
+TOPOSORT: Use mixed toposort = No .
+TOPOSORT: Use alpha-points toposort = No  (nalpha_points=0).
+TOPOSORT: Use opt-destination = No .
+TOPOSORT: WARNING! Constraint 1 is not a knapsack constraint, so the solution of Toposort can be infeasible
+TOPOSORT: WARNING! Constraint 3 is not a knapsack constraint, so the solution of Toposort can be infeasible
+TOPOSORT: WARNING! Constraint 5 is not a knapsack constraint, so the solution of Toposort can be infeasible
+Running TOPOSORT with (1) Expected Time (2) Original obj.
+TOPOSORT: Toposort found solution with value 616310999.237581.
+NOT RUNNING OPTIMIZE DESTINATION TO TOPOSORT SOLUTION, THIS IS NOT RECOMMENDED
+Running TOPOSORT with (1) Expected Time (2) Discounted original obj.
+TOPOSORT: Toposort found solution with value 616310999.237581.
+NOT RUNNING OPTIMIZE DESTINATION TO TOPOSORT SOLUTION, THIS IS NOT RECOMMENDED
+Running TOPOSORT with (1) Expected Time (2) Duals from by
+TOPOSORT: Toposort found solution with value 613820865.189132.
+NOT RUNNING OPTIMIZE DESTINATION TO TOPOSORT SOLUTION, THIS IS NOT RECOMMENDED
+STATS_TOPOSORT_OBJVAL 616310999.237581
+STATS_TOPOSORT_TIME 0.004297
+
+
+          |------------------------------------------------------------|
+          |       TOPOSORT SOLUTION QUALITY INFORMATION                |
+          |------------------------------------------------------------|
+          |                                | PP-AGG Sol  |  Orig Sol   |
+          |--------------------------------+-------------+-------------|
+          | Const. violation (max 3.0e+05) |  0.0000e+00 |  0.0000e+00 |
+          | Prec violation   (max 1.0e-05) |  0.0000e+00 |  0.0000e+00 |
+          | Bounds violation (max 1.0e-05) |  0.0000e+00 |  0.0000e+00 |
+          | Is Feasible?                   |     Yes     |     Yes     |
+          |--------------------------------+-------------+-------------|
+          | W. Int. Viol.    (max 1.0e-02) |  0.0000e+00 |  0.0000e+00 |
+          | S. Int. Viol.    (max 1.0e-02) |  0.0000e+00 |  0.0000e+00 |
+          | Is Integer (weak)?             |     Yes     |     Yes     |
+          | Is Integer (strong)?           |     Yes     |     Yes     |
+          |--------------------------------+-------------+-------------|
+          | Objective Value                |  6.1631e+08 |  6.1631e+08 |
+          |--------------------------------+-------------+-------------|
+          | Best Previous LP Solution      |  6.8291e+08 |  6.8291e+08 |
+          | Replace Best LP Solution?      |     No      |     No      |
+          |------------------------------------------------------------|
+          | Best Previous IP Solution      |-1.7977e+308 |-1.7977e+308 |
+          | Replace Best IP Solution?      |     Yes     |     Yes     |
+          |--------------------------------+-------------+-------------|
+          | Best known Upper Bound         |             |  6.8296e+08 |
+          | Integrality Gap                |             |      9.8%   |
+          |------------------------------------------------------------|
+            TOPOSORT SOLUTION written to openPit_openPit_openPit.TOPOSORT.ip.sol (scen=0)
+
+          |------+------------------+---------+---------|
+          |  t   |    Objval[t]     | Perc[t] |  Acc[t] | 
+          |------+------------------+---------+---------|
+          |    0 |   166490755.9099 |  27.01% |  27.01% |
+          |    1 |   142726140.8712 |  23.16% |  50.17% |
+          |    2 |   140632700.9700 |  22.82% |  72.99% |
+          |    3 |   126252329.6734 |  20.49% |  93.48% |
+          |    4 |    40209071.8130 |   6.52% | 100.00% |
+          |------+------------------+---------+---------|
+          | tot  |   616310999.2376 | 100.00% | 100.00% |
+          |------+------------------+---------+---------|
+
+
+|-----+--------------------------------+--------------------------------+--------------------------------|
+|  t  |         CONSTRAINT:  0         |         CONSTRAINT:  1         |         CONSTRAINT:  2         |
+|-----+--------------------------------+--------------------------------+--------------------------------|
+|   0 |   13132800.00 <=   13219200.00 |   13132800.00 >=    8812800.00 |   10932300.00 <=   10933380.00 |
+|   1 |   13132800.00 <=   13219200.00 |   13132800.00 >=    8812800.00 |   10686600.00 <=   10933380.00 |
+|   2 |   13132800.00 <=   13219200.00 |   13132800.00 >=    8812800.00 |   10014300.00 <=   10933380.00 |
+|   3 |   13132800.00 <=   13219200.00 |   13132800.00 >=    8812800.00 |    9814500.00 <=   10933380.00 |
+|   4 |   13132800.00 <=   13219200.00 |   13132800.00 >=    8812800.00 |    5850900.00 <=   10933380.00 |
+|-----+--------------------------------+--------------------------------+--------------------------------|
+
+
+
+Done with Toposort in 0.010775 seconds. Time elapsed: 0.094513 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1636)
+
+Done with Optimize Destination in 0.000000 seconds. Time elapsed: 0.094515 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1718)
+Not performing naive heuristic
+
+Done with Naive in 0.000000 seconds. Time elapsed: 0.094516 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1837)
+
+Done with CP in 0.000000 seconds. Time elapsed: 0.094517 in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:1987)
+STATS_HEURISTICS_OBJVAL 616310999.237581
+STATS_HEURISTICS_TIME 0.010781
+
+Done with ORSOLVER in 0.094519 seconds. in orsolver_internal (/home/nloira/projects/OMP/code/src/orsolver.c:2241)
+
+HEADER: name param nbins_orig nblocks_orig ndest_orig nperiods_orig narcs_orig nbins_pp nblocks_pp ndestinations_pp nperiods_pp narcs_pp nconstraints nidx_at_orig nidx_at_pp nidx_by_pp time_input_testing time_preprocessing time_aggregation time_init_structs time_input_sol time_hotstart time_cuts time_LP time_topo time_naive time_rtw time_bb time_cp total_time cg_master_time cg_pricing_time cg_iterations bz_out_npartitions out_npartitions_bz out_nrounds_rootcp bb_niter lp_objval_orig lp_objval_pp lp_ubound ip_objval_orig ip_objval_pp ip_ubound toposort_objval naive_objval naive_od_objval rtw_objval
+
+SUMMARY: openPit_openPit_openPit /home/williams/Tesis-Magister/ThesisCode/BendersCode/openPit/params/openPit.params 11760 11760 1 5 53312 6592 6592 1 5 28056 6 58800 26120 26120 0.000722 0.023472 0.000001 0.005184 0.000001 0.000009 0.000001 0.054332 0.010775 0.000000 0.000000 0.000000 0.000000 0.094519 0.021833 0.023279 16 87 0 0 0 682911585.683862 682911585.683862 682955063.464911 616310999.237581 616310999.237581 682955063.464911 616310999.237581 * * *
+
+
+Finished OMP-ORSOLVER in 0.107327 seconds.
+
+STATS_TOTAL_TIME 0.107329
