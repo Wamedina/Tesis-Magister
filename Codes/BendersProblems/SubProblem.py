@@ -18,7 +18,6 @@ class SubProblem:
       self.getOpenPitInfo()
       self.setOpenPitParameters()
       self.setOpenPitMineLimits()
-      #self.setFinalParameters()
       self.setPossibleHeights()
       self.setHeightSets()
 
@@ -40,9 +39,9 @@ class SubProblem:
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
       self.RMu_t = {period : 13219200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
-      self.RMl_t = {period : 8812800.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
+      self.RMl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
       self.RPu_t = {period : 10933380.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
-      self.RPl_t = {period : 7288920 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
+      self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0 for period in range(self.numberOfPeriods)}
       self.maxTimeOpenPit = self.t_C[max(self.t_C)]

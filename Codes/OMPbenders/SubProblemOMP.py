@@ -25,9 +25,9 @@ class SubProblem:
       self.setPossibleHeights()
       self.setHeightSets()
 
-   def execute(self, B_v):
+   def execute(self, B_v, isFinalIteration = False):
       self.createOmpInput(B_v)
-      return (self.executeOmp())
+      return (self.executeOmp(isFinalIteration))
 
    def setOpenPitVariables(self):
       self.openPitBlocksLength = self.database['X'].to_dict() 
@@ -47,11 +47,11 @@ class SubProblem:
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
       self.RMu_t = {period : 13219200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
-      self.RMl_t = {period : 8812800.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
+      self.RMl_t = {period : 0.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
       self.RPu_t = {period : 10933380.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
       self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
-      self.ql_t  = {period : 0 for period in range(self.numberOfPeriods)}
+      self.ql_t  = {period : 0.05 for period in range(self.numberOfPeriods)}
       self.delta = {period: 0 for period in range(self.numberOfPeriods)}
       self.maxTimeOpenPit = self.t_C[max(self.t_C)]
 
@@ -60,9 +60,6 @@ class SubProblem:
       self.openPitBlocksWidthLimits = getNumberOfBlocksInADimension(self.openPitBlocksWidth)
       self.openPitBlocksHeightLimits = getNumberOfBlocksInADimension(self.openPitBlocksHeight)
       self.predecessorBlock = self.setPredecessorBlocks()
-
-   def setModelAndGetResults(self):
-      self.objValue, self.variableValues, self.runtime, self.gap = self.openPitModel()
 
    def setPredecessorBlocks(self):
       self.predecessorBlocks = finalBlock(self.openPitBlocks, self.openPitBlocksLengthLimits,self.openPitBlocksWidthLimits, self.openPitBlocksHeightLimits)
@@ -121,6 +118,7 @@ class SubProblem:
             infeasibleBlocks = 'CONSTRAINT: 6 6 P * L '
             for delta in self.delta.values():
                infeasibleBlocks +=str(delta) + " "
+            
             constraints = [tonUpConstraint, tonLowContraint, matUpConstraint, matLowConstraint, copperLawUpConstraint,copperLawLowConstraint,infeasibleBlocks]
             self.numberOfConstraints = 'NCONSTRAINTS: ' + str(len(constraints))
             f.write('{}\n{}\n{}\n{}\n{}\n{}\n'.format(numberOfDestinations,numberOfPeriods, objective,duration,discountRate,self.numberOfConstraints))
@@ -197,11 +195,14 @@ CPROG.EX_TIME_LIMIT: 28800
 CPROG.HOT_START: 1
 CPROG.NTHREADS: 8""")
 
-   def executeOmp(self):
+   def executeOmp(self, isFinalIteration):
       output = sp.getoutput("./omp.sh ../FilesToExecuteOmpOpenPit/files/openPit.* ../FilesToExecuteOmpOpenPit/params/dbs_duals.params")
-      return self.getPiAndObjectiveValue(output)
+      return self.getPiAndObjectiveValue(output, isFinalIteration)
    
-   def getPiAndObjectiveValue(self, output):
+   def getPiAndObjectiveValue(self, output, isFinalIteration):
+      objective_value_to_use = 0
+      if isFinalIteration:
+         objective_value_to_use = 1
       pi_positions = [positions.start() for positions in re.finditer("rhs= 0.000000", output)]
       pi_t = dict.fromkeys(self.t_C,0)
       for pos in pi_positions:
@@ -211,6 +212,5 @@ CPROG.NTHREADS: 8""")
          pi_t[period_index] = pi_value
 
       objective_value_positions = [positions.start() for positions in re.finditer("Objective Value ", output)]
-      objective_value = float(output[objective_value_positions[0]: objective_value_positions[0]+100].split()[-3])
-
+      objective_value = float(output[objective_value_positions[objective_value_to_use]: objective_value_positions[objective_value_to_use]+100].split()[-3])
       return objective_value, pi_t 
