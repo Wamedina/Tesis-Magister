@@ -129,12 +129,15 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
         for j in i:
             Td_aux += T_d_1[j]
             Qd_aux += Q_d_1[j]
+            print(q_d_1[j],T_d_1[j])
             qd_aux += q_d_1[j]*T_d_1[j]
             cpd_aux += c_pd_1[j]
             cmd_aux += c_md_1[j]
         T_d.append(Td_aux)
         Q_d.append(Qd_aux)
         q_d.append(qd_aux/Td_aux)
+        print(qd_aux, Td_aux)
+        print(q_d)
         c_pd.append(cpd_aux/len(b_drawpoint[0]))
         c_md.append(cmd_aux/len(b_drawpoint[0]))
         

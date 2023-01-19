@@ -132,7 +132,7 @@ class SubProblem:
             duration = 1
             ton = self.L_b[block]
             mineral = self.o_b[block]
-            copperLaw = self.openPitCopperLaw[block] * self.L_b[block]
+            copperLaw = self.openPitCopperLaw[block] #* self.L_b[block]
             #1 si no se puede extraer, 10977 última capa, los bloques van de abajo hacia arriba, 0 primer bloque de abajo, 10977 última capa hacia arriba, con 10975 la sol es vacia
             if block < numberOfInvaiableBlocks:
                f.write(('{} {} {} {} {} {} {}\n').format(index, value, duration,ton, mineral,copperLaw, 1))
