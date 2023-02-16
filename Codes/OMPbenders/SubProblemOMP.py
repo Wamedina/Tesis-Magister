@@ -46,14 +46,15 @@ class SubProblem:
    def setOpenPitParameters(self):
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
-      self.RMu_t = {period : 13219200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
+      self.RMu_t = {period : 13219200.0/4 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
       self.RMl_t = {period : 0.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
-      self.RPu_t = {period : 10933380.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
+      self.RPu_t = {period : 10933380.0/4 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
       self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
-      self.ql_t  = {period : 0.05 for period in range(self.numberOfPeriods)}
+      self.ql_t  = {period : 0.0001 for period in range(self.numberOfPeriods)}
       self.delta = {period: 0 for period in range(self.numberOfPeriods)}
       self.maxTimeOpenPit = self.t_C[max(self.t_C)]
+
 
    def setOpenPitMineLimits(self):
       self.openPitBlocksLengthLimits = getNumberOfBlocksInADimension(self.openPitBlocksLength)
@@ -109,13 +110,13 @@ class SubProblem:
             
             copperLawUpConstraint = 'CONSTRAINT: 4 5 P * L ' 
             for qut in self.qu_t.values():
-               copperLawUpConstraint +=str(qut*sum(self.L_b.values())) + " "
+               copperLawUpConstraint += "0 "
 
-            copperLawLowConstraint = 'CONSTRAINT: 5 5 P * G '
+            copperLawLowConstraint = 'CONSTRAINT: 5 6 P * G '
             for qlt in self.ql_t.values():
-               copperLawLowConstraint +=str(qlt*sum(self.L_b.values())) + " "
+               copperLawLowConstraint +="0 "
 
-            infeasibleBlocks = 'CONSTRAINT: 6 6 P * L '
+            infeasibleBlocks = 'CONSTRAINT: 6 7 P * L '
             for delta in self.delta.values():
                infeasibleBlocks +=str(delta) + " "
             
@@ -132,12 +133,14 @@ class SubProblem:
             duration = 1
             ton = self.L_b[block]
             mineral = self.o_b[block]
-            copperLaw = self.openPitCopperLaw[block] #* self.L_b[block]
+            copperLawUpper = self.openPitCopperLaw[block] * self.L_b[block] - self.qu_t[0] * self.L_b[block]
+            copperLawLower = self.openPitCopperLaw[block] * self.L_b[block] - self.ql_t[0] * self.L_b[block]
+
             #1 si no se puede extraer, 10977 última capa, los bloques van de abajo hacia arriba, 0 primer bloque de abajo, 10977 última capa hacia arriba, con 10975 la sol es vacia
             if block < numberOfInvaiableBlocks:
-               f.write(('{} {} {} {} {} {} {}\n').format(index, value, duration,ton, mineral,copperLaw, 1))
+               f.write(('{} {} {} {} {} {} {} {}\n').format(index, value, duration, ton, mineral,copperLawUpper, copperLawLower, 1))
             else:
-               f.write(('{} {} {} {} {} {} {}\n').format(index, value, duration,ton, mineral,copperLaw, 0))
+               f.write(('{} {} {} {} {} {} {} {}\n').format(index, value, duration, ton, mineral,copperLawUpper, copperLawLower, 0))
                  
    def writePrecFile(self):
       with open('../FilesToExecuteOmpOpenPit/files/openPit.prec', 'w') as f:
@@ -206,6 +209,7 @@ CPROG.NTHREADS: 8""")
       pi_positions = [positions.start() for positions in re.finditer("rhs= 0.000000", output)]
       pi_t = dict.fromkeys(self.t_C,0)
       for pos in pi_positions:
+         
          pi_value = float(output[pos-48: pos].split()[-3])
          pi_index = float(output[pos-48: pos].split()[-5])
          period_index = pi_index - self.numberOfPeriods * (self.numberOfConstraints - 1)
