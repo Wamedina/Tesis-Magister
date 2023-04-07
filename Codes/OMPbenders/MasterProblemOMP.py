@@ -5,6 +5,7 @@ from   gurobipy   import GRB
 from drawpointFunction  import drawpointFunction
 from globalFunctions import getNumberOfBlocksInADimension
 from itertools import chain
+from functools import reduce
 
 
 class MasterProblem:
@@ -15,6 +16,7 @@ class MasterProblem:
         self.DP_init = 0       #### Tipo de extracción
         self.desc = 0.1
         self.colHeight = 300
+        self.minColHeight = 0.40
         self.pos_x = 430     
         self.pos_y = 550     
         self.pos_z = 780
@@ -52,9 +54,9 @@ class MasterProblem:
     def setUndergroundParameters(self):
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
-        self.MU_mt = {period : 25806600.0/3  for period in range(self.numberOfPeriods)} #Tonleage es mina
+        self.MU_mt = {period : 25806600.0/4 for period in range(self.numberOfPeriods)} #Tonleage es mina
         self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
-        self.MU_pt = {period : 17777880.0/3  for period in range(self.numberOfPeriods)}#Mineral es planta
+        self.MU_pt = {period : 17777880.0/4 for period in range(self.numberOfPeriods)}#Mineral es planta
         self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
@@ -74,7 +76,14 @@ class MasterProblem:
         self.drawpoint, self.G_d, self.Q_d,self.q_d, self.C_pdt, self.C_mdt, self.predecessor, self.x_draw,self.y_draw, self.z_draw = drawpointFunction(
                         self.pos_x, self.pos_y, self.pos_z, self.colHeight, self.DP_init, self.undergroundBlocksLenghtLimits, self.undergroundBlocksWidthLimits, self.undergroundBlocksHeightLimits, self.undergroundBlockTonnage, self.undergroundCP_S, self.undergroundCM_S, self.undergroundBlockMineral,
                         self.undergroundCopperLaw, self.pos_x_f, self.pos_y_f,self.orientationToExtractTheDrawpoints)
-    
+        self.predecessorDict = {}
+        self.predecessorDict[0] = []
+        self.predecessorDict[1] = [0]
+        for i in range(1,len(self.predecessor)):
+            if self.predecessor[i][0] not in self.predecessorDict.keys():
+                self.predecessorDict[self.predecessor[i][0]] = []
+            self.predecessorDict[self.predecessor[i][0]].append(self.predecessor[i][1])
+
     def setVandB_vParameters(self):
         self.setPossibleHeights()
         self.V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
@@ -129,7 +138,8 @@ class MasterProblem:
 
         #4. Todos los puntos de extracción deben ser iniciados en el largo de la extracción
         Drawp_init = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint), "Drawp_init")
-        
+        Drawp_init_2 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) >= 0.1 for d in self.drawpoint), "Drawp_init_2")
+
         #5. Los puntos de extracción deben ser activados al menos en el mismo periodo para que se inicie la extracción 
         Drawpextract_61 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, tau] for tau in range(ti+1)) >= z_dt[d, ti]  
                                             for d in self.drawpoint for ti in self.t_S), "Drawpextract_61")
@@ -167,7 +177,7 @@ class MasterProblem:
                                                         for ti in self.t_S), "Drawpextract_67_1")
 
         #11. La altura a extraer debe ser mayor a una cantidad m ́ınima.
-        #rest_11 = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d,ti] for ti in self.t_S)>= self.colHeight for d in self.drawpoint))
+        rest_11 = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d,ti] for ti in self.t_S)>= self.minColHeight for d in self.drawpoint))
 
         #12. No podemos extraer más del 100 % de un drawpoint.
         Reserver_cnst = self.undergroundModel.addConstrs((gp.quicksum(y_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint),
@@ -181,18 +191,11 @@ class MasterProblem:
         #15. Existe una m ́axima cantidad de drawpoints a extraer por periodo.
         rest_15= self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for d in self.drawpoint) <= self.N_t[ti] for ti in self.t_S)
                                                     , "Drawpextract_65")
-
         
-
         #16. Restricción sobre el inicio de la extracci ́on de los drawpoints.
-        DP_Sup = self.undergroundModel.addConstrs((gp.quicksum(x_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
-                                    gp.quicksum(x_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
-                                    for l in range(len(self.predecessor))), "DP_Sup")
+        alternative = self.undergroundModel.addConstrs(gp.quicksum(x_dt[a,s] for s in range(0,ti+1)) >= x_dt[d, ti] for d in self.drawpoint for ti in self.t_S for a in self.predecessorDict[d])
 
-        #17. Restricci ́on sobre la extracci ́on de los drawpoints.
-        restricion_z_dt = self.undergroundModel.addConstrs((gp.quicksum(z_dt[self.predecessor[l][0], s]*(max(self.t_S)-s+1) for s in self.t_S) <=
-                                    gp.quicksum(z_dt[self.predecessor[l][1], s]*(max(self.t_S)-s+1) for s in self.t_S)  
-                                    for l in range(len(self.predecessor))), "DP_Sup")
+
        
         
         #Conjuntos para el crown pillar
@@ -203,8 +206,8 @@ class MasterProblem:
         self.theta = self.undergroundModel.addVar(vtype=GRB.CONTINUOUS,name="theta")
 
 
-        pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(y_dt[d, ti] for d in self.drawpoint
-                                                        for ti in self.t_S) <= self.rho_v[v] * self.w_v[v] + (1 - self.w_v[v]) for v in self.V)
+        pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(y_dt[d, ti] 
+                                                        for ti in self.t_S) <= self.rho_v[v] * self.w_v[v] + (1 - self.w_v[v]) for v in self.V for d in self.drawpoint)
        
         pillar_3 = self.undergroundModel.addConstr(gp.quicksum(self.w_v[v] for v in self.V) == 1)
 

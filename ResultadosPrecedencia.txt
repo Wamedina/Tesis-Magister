@@ -1,0 +1,23 @@
+Resultados forma restricción precedencia:
+
+Con todos los predecesores:
+
+
+Exacta
+5 periodos 38,4 0,00 3,515,739,720
+10 periodos 274,3 4,5930 2,899,832,279
+15 periodos 655,8 4,7117 2,476,021,470
+20 periodos 2619,8 4,999 2,095,361,539
+
+Benders
+5 periodos 26,7 2,760,650,916
+
+Benders omp
+5 periodos 7,7 2,0649 2,688,233,979				65,5 0,3650 2,830,099,882
+10 periodos 308,4 1,8973 2,228,454,437				411,7 0,5799 2,329,593,937	
+15 periodos  (35 min aprox) 1,0122 1,884,355,419
+
+
+
+
+
