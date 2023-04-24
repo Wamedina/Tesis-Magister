@@ -135,7 +135,7 @@ class SubProblem:
       
       
       self.openPitModel.setObjective(FO_OP, GRB.MAXIMIZE)
-      self.openPitModel.Params.MIPGap = 0.05
+      self.openPitModel.Params.MIPGap = 0.01
       
       lista_variable_Integrado = (self.openPitModel.getAttr(GRB.Attr.X, self.openPitModel.getVars()))
       runtime = self.openPitModel.Runtime

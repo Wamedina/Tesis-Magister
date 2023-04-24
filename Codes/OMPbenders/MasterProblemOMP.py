@@ -54,9 +54,9 @@ class MasterProblem:
     def setUndergroundParameters(self):
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
-        self.MU_mt = {period : 25806600.0/4 for period in range(self.numberOfPeriods)} #Tonleage es mina
+        self.MU_mt = {period : 25806600.0 for period in range(self.numberOfPeriods)} #Tonleage es mina
         self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
-        self.MU_pt = {period : 17777880.0/4 for period in range(self.numberOfPeriods)}#Mineral es planta
+        self.MU_pt = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Mineral es planta
         self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
@@ -137,8 +137,7 @@ class MasterProblem:
                                 self.qU_dt[ti] * gp.quicksum(self.G_d[d] * y_dt[d, ti] for d in self.drawpoint) for ti in self.t_S), "GQC_Up")
 
         #4. Todos los puntos de extracción deben ser iniciados en el largo de la extracción
-        Drawp_init = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint), "Drawp_init")
-        Drawp_init_2 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) >= 0.1 for d in self.drawpoint), "Drawp_init_2")
+        Drawp_init = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, ti] for ti in self.t_S) == 1 for d in self.drawpoint), "Drawp_init")
 
         #5. Los puntos de extracción deben ser activados al menos en el mismo periodo para que se inicie la extracción 
         Drawpextract_61 = self.undergroundModel.addConstrs((gp.quicksum(x_dt[d, tau] for tau in range(ti+1)) >= z_dt[d, ti]  
