@@ -174,7 +174,7 @@ class MasterProblem:
                                                         for ti in self.t_S), "Drawpextract_67_1")
 
         #11. La altura a extraer debe ser mayor a una cantidad m ́ınima.
-        rest_11 = self.undergroundModel.addConstrs((gp.quicksum(self.y_dt[d,ti] * self.z_dt[d,ti] for ti in self.t_S)>= self.minColHeight for d in self.drawpoint))
+        rest_11 = self.undergroundModel.addConstrs((gp.quicksum(self.y_dt[d,ti] for ti in self.t_S)>= self.minColHeight for d in self.drawpoint))
 
         #12. No podemos extraer más del 100 % de un drawpoint.
         Reserver_cnst = self.undergroundModel.addConstrs((gp.quicksum(self.y_dt[d, ti] for ti in self.t_S) <= 1 for d in self.drawpoint),
