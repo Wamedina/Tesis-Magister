@@ -10,9 +10,10 @@ import subprocess as sp
 
 
 class SubProblem:
-   def __init__(self, database, numberOfPeriods):
+   def __init__(self, database, numberOfPeriods, safetyLevel):
       self.database = database
       self.numberOfPeriods = numberOfPeriods
+      self.safetyLevel = safetyLevel
       self.numberOfDestinations = 1
       self.basePrice = 3791.912
       self.desc = 0.1
@@ -46,10 +47,10 @@ class SubProblem:
    def setOpenPitParameters(self):
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
-      self.RMu_t = {period : 13219200.0/4 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
-      self.RMl_t = {period : 0.0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
-      self.RPu_t = {period : 10933380.0/4 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
-      self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
+      self.RMu_t = {period : 25806600.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
+      self.RMl_t = {period : 25806600.0/3 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
+      self.RPu_t = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
+      self.RPl_t = {period : 17777880/3 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0.0001 for period in range(self.numberOfPeriods)}
       self.delta = {period: 0 for period in range(self.numberOfPeriods)}
@@ -71,16 +72,26 @@ class SubProblem:
    def setHeightSets(self):
       self.V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
       self.B_v = {}
-      self.rho_v = {v:1 - (v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
+      self.rho_v = {v:(v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
 
       for v in self.V:
          numberOfBlocksBelowV = (self.openPitBlocksLengthLimits[3]*self.openPitBlocksWidthLimits[3])*((v-self.minHeight)/self.openPitBlocksHeightLimits[0])
          blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if not numberOfBlocksBelowV == 0]
          self.B_v[v] = blocksBelowV
+   """         
+      for v in self.V:
+         heightWithSafetyLevel = v + self.safetyLevel
+         if heightWithSafetyLevel not in self.B_v.keys():
+               closestHeight = next((height for height in sorted(self.V) if height >= heightWithSafetyLevel), None)
+               if closestHeight == None:
+                  self.B_v[v + self.safetyLevel] = [block for block in range(len(self.openPitBlocks))]
+               else:
+                  self.B_v[v + self.safetyLevel] = [block for block in range(len(self.B_v[closestHeight]))]
+   """
 
-   def createOmpInput(self, B_v):
+   def createOmpInput(self, infeasibleBlocks):
       self.writeProblemFile()
-      self.writeBlocksFile(B_v)
+      self.writeBlocksFile(infeasibleBlocks)
       self.writePrecFile()
       self.writeParamsFile()
    
@@ -121,11 +132,12 @@ class SubProblem:
                infeasibleBlocks +=str(delta) + " "
             
             constraints = [tonUpConstraint, tonLowContraint, matUpConstraint, matLowConstraint, copperLawUpConstraint,copperLawLowConstraint,infeasibleBlocks]
+            self.nConstraints = len(constraints)
             self.numberOfConstraints = 'NCONSTRAINTS: ' + str(len(constraints))
             f.write('{}\n{}\n{}\n{}\n{}\n{}\n'.format(numberOfDestinations,numberOfPeriods, objective,duration,discountRate,self.numberOfConstraints))
             f.write('{}\n{}\n{}\n{}\n{}\n{}\n{}\n'.format(*constraints))
 
-   def writeBlocksFile(self, numberOfInvaiableBlocks):
+   def writeBlocksFile(self, infeasibleBlocks):
       with open('../FilesToExecuteOmpOpenPit/files/openPit.blocks', 'w') as f:
          for block in self.openPitBlocks:
             index = block
@@ -137,7 +149,7 @@ class SubProblem:
             copperLawLower = self.openPitCopperLaw[block] * self.L_b[block] - self.ql_t[0] * self.L_b[block]
 
             #1 si no se puede extraer, 10977 última capa, los bloques van de abajo hacia arriba, 0 primer bloque de abajo, 10977 última capa hacia arriba, con 10975 la sol es vacia
-            if block < numberOfInvaiableBlocks:
+            if block < infeasibleBlocks:
                f.write(('{} {} {} {} {} {} {} {}\n').format(index, value, duration, ton, mineral,copperLawUpper, copperLawLower, 1))
             else:
                f.write(('{} {} {} {} {} {} {} {}\n').format(index, value, duration, ton, mineral,copperLawUpper, copperLawLower, 0))
@@ -212,7 +224,7 @@ CPROG.NTHREADS: 8""")
          
          pi_value = float(output[pos-48: pos].split()[-3])
          pi_index = float(output[pos-48: pos].split()[-5])
-         period_index = pi_index - self.numberOfPeriods * (self.numberOfConstraints - 1)
+         period_index = pi_index - self.numberOfPeriods * (self.nConstraints - 1)
          pi_t[period_index] = pi_value
 
       objective_value_positions = [positions.start() for positions in re.finditer("Objective Value ", output)]

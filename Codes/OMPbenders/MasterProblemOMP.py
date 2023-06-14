@@ -17,10 +17,10 @@ class MasterProblem:
         self.desc = 0.1
         self.colHeight = 300
         self.minColHeight = 0.40
-        self.pos_x = 430     
+        self.pos_x = 440     
         self.pos_y = 550     
         self.pos_z = 780
-        self.pos_x_f = 730     
+        self.pos_x_f = 720     
         self.pos_y_f = 910     
         self.p_t = 3791.912
         self.epsilon = 1
@@ -54,10 +54,10 @@ class MasterProblem:
     def setUndergroundParameters(self):
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
-        self.MU_mt = {period : 25806600.0/4 for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
-        self.MU_pt = {period : 17777880.0/4 for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
+        self.MU_mt = {period : 25806600.0 for period in range(self.numberOfPeriods)} #Tonleage es mina
+        self.ML_mt = {period : 25806600.0/3  for period in range(self.numberOfPeriods)}
+        self.MU_pt = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Mineral es planta
+        self.ML_pt = {period : 17777880.0/3 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
@@ -88,7 +88,7 @@ class MasterProblem:
         self.setPossibleHeights()
         self.V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
         self.B_v = {}
-        self.rho_v = {v:1 - (v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
+        self.rho_v = {v:(v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
 
         for v in self.V:
             numberOfBlocksBelowV = (self.undergroundBlocksLenghtLimits[3]*self.undergroundBlocksWidthLimits[3])*((v-self.minHeight)/self.undergroundBlocksHeightLimits[0])
