@@ -39,9 +39,9 @@ class SubProblem:
    def setOpenPitParameters(self):
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
-      self.RMu_t = {period : 13219200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
+      self.RMu_t = {period : 25806600.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
       self.RMl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
-      self.RPu_t = {period : 10933380.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
+      self.RPu_t = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
       self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0.0001 for period in range(self.numberOfPeriods)}
@@ -51,13 +51,14 @@ class SubProblem:
       self.openPitBlocksLengthLimits = getNumberOfBlocksInADimension(self.openPitBlocksLenght)
       self.openPitBlocksWidthLimits = getNumberOfBlocksInADimension(self.openPitBlocksWidth)
       self.openPitBlocksHeightLimits = getNumberOfBlocksInADimension(self.openPitBlocksHeight)
+      
       self.predecessorBlock = self.setPredecessorBlock()
       self.predecessorsBlocks = {}
       for blocklist in self.predecessorBlock:
          if blocklist[0] not in self.predecessorsBlocks.keys():
-            self.predecessorsBlocks[blocklist[0]] = []
+               self.predecessorsBlocks[blocklist[0]] = []
          if blocklist[0] != blocklist[1]:
-            self.predecessorsBlocks[blocklist[0]].append(blocklist[1])
+               self.predecessorsBlocks[blocklist[0]].append(blocklist[1])
 
    def setPredecessorBlock(self):
         predecessorBlock = []
@@ -100,22 +101,22 @@ class SubProblem:
       self.openPitModel.Params.OutputFlag = 0
       
       #6. Naturaleza de variables
-      self.x_bt = self.openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.INTEGER, name="x_bt")
+      self.x_bt = self.openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.CONTINUOUS, name="x_bt")
       if isFinalIteration:
          self.x_bt = self.openPitModel.addVars(self.t_C, self.openPitBlocks, vtype=GRB.BINARY, name="x")
 
 
 
       #1. Restricci ́on sobre la cantidad de tonelaje m ́axima y m ́ınima a extraer en cada periodo.
-      Ton_Up  = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
+      openPitModel_Ton_Up  = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
                               <= self.RMu_t[ti] for ti in self.t_C), "Ton_max")
-      Ton_low = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
+      openPitModel_Ton_low = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) 
                               >= self.RMl_t[ti] for ti in self.t_C), "Ton_min")
 
       #2. Restricci ́on sobre la cantidad de material m ́axima y m ́ınima a extraer en cada periodo.
-      self.Mat_Up_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) <= 
+      openPitModel_Mat_Up_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) <= 
                               self.RPu_t[ti] for ti in self.t_C), "Mat_max")
-      Mat_low_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) >= 
+      openPitModel_Mat_low_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.o_b[b] for b in self.openPitBlocks) >= 
                               self.RPl_t[ti] for ti in self.t_C), "Mat_min")
 
       #3. Restricci ́on de precedencia de los bloques a extraer, debemos extraer los 5 bloques superiores al bloque objetivo para sacar a este
@@ -123,22 +124,21 @@ class SubProblem:
       #BLOCK_SUP_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[s, self.predecessorBlock[l][0]]*(self.maxTimeOpenPit-s+1) for s in self.t_C) <= 
       #                              gp.quicksum(self.x_bt[s, self.predecessorBlock[l][1]]*(self.maxTimeOpenPit-s+1) for s in self.t_C)  
       #                           for l in range(len(self.predecessorBlock))), "Superior_Block")
-      alternative_block = self.openPitModel.addConstrs(gp.quicksum(self.x_bt[s,a] for s in range(0,ti+1)) >= self.x_bt[ti, b] for b in self.openPitBlocks for ti in self.t_C for a in self.predecessorsBlocks[b])
+      openPitModel_Precedence = self.openPitModel.addConstrs(gp.quicksum(self.x_bt[s,a] for s in range(0,ti+1)) >= self.x_bt[ti, b] for b in self.openPitBlocks for ti in self.t_C for a in self.predecessorsBlocks[b])
 
 
       #4. Restricci ́on sobre la ley m ́axima y m ́ınima por periodo.
-      GQC_Up_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) <=
+      openPitModel_GQC_Up_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) <=
                            self.qu_t[ti] * gp.quicksum(self.x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) for ti in self.t_C), 
-                              "GQC_Up")
+                              "openPitModel_GQC_Up")
 
-      GQC_low_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) >=
+      openPitModel_GQC_low_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b]*self.L_b[b]*self.openPitCopperLaw[b] for b in self.openPitBlocks) >=
                            self.ql_t[ti] * gp.quicksum(self.x_bt[ti, b]*self.L_b[b] for b in self.openPitBlocks) for ti in self.t_C), 
-                              "GQC_LOW")
+                              "openPitModel_GQC_LOW")
 
-     
       #5. Podemos extraer el bloque en un solo periodo.
-      Reserve_cons_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 for b in self.openPitBlocks), 
-                              "Reserve_cons")
+      openPitModel_Reserve_cons_OP = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 for b in self.openPitBlocks), 
+                              "openPitModel_Reserve_cons")
 
       #Función objetivo
       self.openPitObjectiveFunction = gp.quicksum(self.x_bt[ti, b]*((((self.basePrice*self.openPitCopperLaw[b]-self.c_pbt[b])*self.o_b[b])-(self.c_mbt[b]*self.L_b[b]))/((1+self.desc)**self.t_C[ti]))
@@ -153,18 +153,23 @@ class SubProblem:
 
 
    def optimize(self, estimatedW_v):
-      gp.GRB.Dual = True
       self.heightRestriction = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v] for v in self.V for b in self.B_v[v + self.safetyLevel]), "heightRestriction")
       self.openPitModel.optimize()
-      self.x_bt_values = self.openPitModel.getAttr('X', self.x_bt)
+      gp.GRB.QCPDual = True
 
       #objVal = self.openPitModel.objVal
-      objVal = self.openPitObjectiveFunction.getValue()
-      self.lista_variable_Integrado = self.openPitModel.getAttr(GRB.Attr.X, self.openPitModel.getVars())
-      #print(objVal)
-      #if self.openPitModel.Status == gp.GRB.Status.OPTIMAL and objVal > 0:
+
       if self.openPitModel.Status == gp.GRB.OPTIMAL:
          self.pi_v = [dualVariable.Pi for dualVariable in self.heightRestriction.values()]
+         self.x_bt_values = self.openPitModel.getAttr('X', self.x_bt)
+         objVal = self.openPitObjectiveFunction.getValue()
+         self.lista_variable_Integrado = self.openPitModel.getAttr(GRB.Attr.X, self.openPitModel.getVars())
+
+      #elif self.openPitModel.Status == gp.GRB.INFEASIBLE:
       else:
-         print("El estado de la solución no es óptimo. Estado actual:", self.openPitModel.Status)
+         print(self.openPitModel.Status)
+         self.pi_v = [dualVariable.farkasDual for dualVariable in self.heightRestriction.values()]
+         objVal = 0
+
+         print("El estado de la solución no es óptimo")
       return objVal, self.pi_v

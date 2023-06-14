@@ -53,9 +53,9 @@ class MasterProblem:
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
         self.MU_mt = {period : 25806600.0 for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 0.0  for period in range(self.numberOfPeriods)}
+        self.ML_mt = {period : 0  for period in range(self.numberOfPeriods)}
         self.MU_pt = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 0.0 for period in range(self.numberOfPeriods)}
+        self.ML_pt = {period : 0 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
@@ -200,7 +200,7 @@ class MasterProblem:
         pillar_3 = self.undergroundModel.addConstr(gp.quicksum(self.w_v[v] for v in self.V) == 1)
 
         theta_restriction_1 = self.undergroundModel.addConstr(-gp.GRB.INFINITY <= self.theta)
-        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 10000000000)
+        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 1000000000)
 
         #Función objetivo
         self.undergroundObjectiveFunction = self.theta + gp.quicksum(self.y_dt[d, ti]*((((self.p_t * self.q_d[d] - self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
@@ -214,5 +214,5 @@ class MasterProblem:
         lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
         solucion = self.undergroundModel.objVal
         runtime = self.undergroundModel.Runtime
-        print(f"GAP: {self.undergroundModel.MIPGap}")
+        #print(f"GAP: {self.undergroundModel.MIPGap}")
         return {key:value.X for key,value in zip(self.w_v, self.w_v.values())}, self.theta

@@ -205,7 +205,7 @@ CPROG.NTHREADS: 8""")
 
    def executeOmp(self, isFinalIteration):
       output = sp.getoutput("./omp.sh ../FilesToExecuteOmpOpenPit/files/openPit.* ../FilesToExecuteOmpOpenPit/params/dbs_duals.params")
-      print(output)
+      #print(output)
       return self.getPiAndObjectiveValue(output, isFinalIteration)
    
    def getPiAndObjectiveValue(self, output, isFinalIteration):
