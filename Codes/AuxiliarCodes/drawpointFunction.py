@@ -79,6 +79,7 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
     q_d_1 = []
     c_pd_1 = []
     c_md_1 = []
+    total_blocks = []
     for i in b1_l:
         Td_aux = 0
         Qd_aux = 0
@@ -91,6 +92,8 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
         b4 = int(b3 + 1)
         b5 = int(b3 + limites_y[3] + 1)
         b6 = int(b5 + 1)
+        total_blocks.extend([b1, b2, b3, b4, b5, b6])
+
         Td_aux += (TON[b1] + TON[b2] + TON[b3] + TON[b4] + TON[b5] + TON[b6])
         cpd_aux += (CP_S[b1] + CP_S[b2] + CP_S[b3] + CP_S[b4] + CP_S[b5] + CP_S[b6])/6
         cmd_aux += (CM_S[b1] + CM_S[b2] + CM_S[b3] + CM_S[b4] + CM_S[b5] + CM_S[b6])/6
@@ -268,4 +271,11 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
         lista_aux.append(DP_pred[i])
         predecessor.append(lista_aux)
 
-    return (drawpoint, T_d, Q_d, q_d, c_pd, c_md, predecessor, x_draw, y_draw, z_draw)
+    drawpoints_blocks = {}    
+    chunk_size = int(len(total_blocks)/len(drawpoint))
+
+    for drawpoint_id,blocks_range in zip(DP_pred,range(0, len(total_blocks), chunk_size)):
+        drawpoints_blocks[drawpoint_id] = total_blocks[blocks_range:blocks_range + chunk_size]
+
+
+    return (drawpoint, T_d, Q_d, q_d, c_pd, c_md, predecessor, x_draw, y_draw, z_draw,drawpoints_blocks)

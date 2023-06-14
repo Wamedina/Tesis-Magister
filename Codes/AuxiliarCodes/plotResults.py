@@ -6,7 +6,7 @@ def Separador_Variable_CA(LISTA_VARIABLE_X, bloques_CA):
     blocks_year =[]
     aux_year = []
     for i in LISTA_VARIABLE_X:
-        if i == 1:
+        if i > 0.5:
             a = j//len(bloques_CA)+1
             b = j%len(bloques_CA)
             aux_year.append(int(b))
@@ -94,7 +94,7 @@ def plotResults(variableValues,CA_blocks, openPitBlocksLenghtLimits, openPitBloc
     ## Finalmente se debe pasar esto a la matriz
     M_F = list()
     for i in coordenadas_X_CA:
-        lista_f = matriz_ca_x([20,20,20], i)
+        lista_f = matriz_ca_x([40,40,40], i)
         M_F.append(np.array(lista_f))
 
 
@@ -109,7 +109,7 @@ def plotResults(variableValues,CA_blocks, openPitBlocksLenghtLimits, openPitBloc
             ]
 
     fig = plt.figure(figsize=(25,25))
-    ax = fig.gca(projection='3d')
+    ax = fig.add_subplot(projection='3d')
     ax.set_aspect('auto')
 
     ax.set_xlabel('Axis X',fontsize= 25)
