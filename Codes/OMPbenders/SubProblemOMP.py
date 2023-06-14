@@ -80,9 +80,9 @@ class SubProblem:
          blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if numberOfBlocksBelowV != 0]
          self.B_v[v] = blocksBelowV
 
-   def createOmpInput(self, B_v):
+   def createOmpInput(self, infeasibleBlocks):
       self.writeProblemFile()
-      self.writeBlocksFile(B_v)
+      self.writeBlocksFile(infeasibleBlocks)
       self.writePrecFile()
       self.writeParamsFile()
    
