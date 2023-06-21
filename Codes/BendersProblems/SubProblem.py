@@ -158,7 +158,6 @@ class SubProblem:
 
 
    def optimize(self, estimatedW_v):
-      print(f'La w_v que me llegó fue {estimatedW_v}')
       #Acá agregamos el safety lvl
       self.heightRestriction = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v] for v in self.V for b in self.B_v[v]), "heightRestriction")
       self.openPitModel.optimize()
