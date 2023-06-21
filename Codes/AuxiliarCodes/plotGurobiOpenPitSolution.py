@@ -80,7 +80,7 @@ def matriz_ca_x (bloques_final, lista_final):
         
     return matriz
 
-def plotResults(variableValues,CA_blocks, openPitBlocksLenghtLimits, openPitBlocksWidthLimits, openPitBlocksHeightLimits,undergroundBlocksWidthLimits,undergroundBlocksHeightLimits):
+def plotGurobiOpenPitSolution(variableValues,CA_blocks, openPitBlocksLenghtLimits, openPitBlocksWidthLimits, openPitBlocksHeightLimits,undergroundBlocksWidthLimits,undergroundBlocksHeightLimits):
     lista_x_CA_separada = Separador_Variable_CA(variableValues,CA_blocks)
     distancia_rebloq = [0,0,0]
     rebloqueo_x = 1

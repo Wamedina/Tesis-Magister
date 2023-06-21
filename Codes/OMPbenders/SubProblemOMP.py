@@ -10,9 +10,11 @@ import subprocess as sp
 
 
 class SubProblem:
-   def __init__(self, database, numberOfPeriods, safetyLevel):
+   def __init__(self, database, minHeightUnderground, maxHeightUnderground,numberOfPeriods, safetyLevel):
       self.database = database
       self.numberOfPeriods = numberOfPeriods
+      self.minHeightUnderground = minHeightUnderground
+      self.maxHeightUnderground = maxHeightUnderground
       self.safetyLevel = safetyLevel
       self.numberOfDestinations = 1
       self.basePrice = 3791.912
@@ -47,10 +49,10 @@ class SubProblem:
    def setOpenPitParameters(self):
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
-      self.RMu_t = {period : 13219200.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
-      self.RMl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
-      self.RPu_t = {period : 10933380.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
-      self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
+      self.RMu_t = {period : 25806600.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
+      self.RMl_t = {period : 0.0/3 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
+      self.RPu_t = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
+      self.RPl_t = {period : 0/3 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0.0001 for period in range(self.numberOfPeriods)}
       self.delta = {period: 0 for period in range(self.numberOfPeriods)}
@@ -73,13 +75,14 @@ class SubProblem:
       #Acá hay que redifinir self.B_v para que tenga las alturas de maxheight al sumarle el safetylvl
 
       self.V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
-      self.rho_v = {v:(v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
       self.B_v = {}
+      self.rho_v = {v:( ((v- self.safetyLevel - self.minHeightUnderground)/(self.maxHeightUnderground - self.minHeightUnderground)) if v - self.minHeightUnderground > 0 else 0 ) for v in self.V}
+
       for v in self.V:
          numberOfBlocksBelowV = (self.openPitBlocksLengthLimits[3]*self.openPitBlocksWidthLimits[3])*((v-self.minHeight)/self.openPitBlocksHeightLimits[0])
-         blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if numberOfBlocksBelowV != 0]
+         blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if not numberOfBlocksBelowV == 0]
          self.B_v[v] = blocksBelowV
-
+         
    def createOmpInput(self, infeasibleBlocks):
       self.writeProblemFile()
       self.writeBlocksFile(infeasibleBlocks)
@@ -130,7 +133,7 @@ class SubProblem:
             f.write('{}\n{}\n{}\n{}\n{}\n{}\n{}\n'.format(*constraints))
 
    def writeBlocksFile(self, numberOfInvaiableBlocks):
-      print(f'Se optimizó el subproblema con {numberOfInvaiableBlocks} bloques infactibles')
+      #print(f'Se optimizó el subproblema con {numberOfInvaiableBlocks} bloques infactibles')
       with open('../FilesToExecuteOmpOpenPit/files/openPit.blocks', 'w') as f:
          for block in self.openPitBlocks:
             index = block

@@ -7,10 +7,13 @@ from openPitFunctions import finalBlock
 
 class SubProblem:
    #OpenPit Problem 
-   def __init__(self, database, numberOfPeriods, safetyLevel):
+   def __init__(self, database, minHeightUnderground, maxHeightUnderground,numberOfPeriods, safetyLevel):
       self.database = database
       self.numberOfPeriods = numberOfPeriods
+      self.minHeightUnderground = minHeightUnderground
+      self.maxHeightUnderground = maxHeightUnderground
       self.safetyLevel = safetyLevel
+      self.numberOfDestinations = 1
       self.basePrice = 3791.912
       self.desc = 0.1
 
@@ -40,11 +43,12 @@ class SubProblem:
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
       self.RMu_t = {period : 25806600.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
-      self.RMl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
+      self.RMl_t = {period : 0.0/3 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
       self.RPu_t = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
-      self.RPl_t = {period : 0 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
+      self.RPl_t = {period : 0/3 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0.0001 for period in range(self.numberOfPeriods)}
+      self.delta = {period: 0 for period in range(self.numberOfPeriods)}
       self.maxTimeOpenPit = self.t_C[max(self.t_C)]
 
    def setOpenPitMineLimits(self):
@@ -76,14 +80,14 @@ class SubProblem:
    
    def setHeightSets(self):
       self.V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
-      self.rho_v = {v:(v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
+      self.rho_v = {v:( ((v- self.safetyLevel - self.minHeightUnderground)/(self.maxHeightUnderground - self.minHeightUnderground)) if v - self.minHeightUnderground > 0 else 0 ) for v in self.V}
       self.B_v = {}
       for v in self.V:
          numberOfBlocksBelowV = (self.openPitBlocksLengthLimits[3]*self.openPitBlocksWidthLimits[3])*((v-self.minHeight)/self.openPitBlocksHeightLimits[0])
          blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if numberOfBlocksBelowV != 0]
          self.B_v[v] = blocksBelowV
-
-      for v in self.V:
+      #self.B_v = sorted(self.B_v)
+      """for v in self.V:
          heightWithSafetyLevel = v + self.safetyLevel
          if heightWithSafetyLevel not in self.B_v.keys():
                closestHeight = next((height for height in sorted(self.V) if height >= heightWithSafetyLevel), None)
@@ -94,7 +98,8 @@ class SubProblem:
    
    def addCrownPillarRestriction(self, estimatedW_v):
       self.heightRestriction = self.openPitModel.addConstrs(gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v] for v in (self.V) for b in self.B_v[v])
-   
+         """
+
 
    def setModel(self, isFinalIteration = False):#,w_opt):
       self.openPitModel = gp.Model(name = 'Open Pit Model')
@@ -153,14 +158,22 @@ class SubProblem:
 
 
    def optimize(self, estimatedW_v):
-      self.heightRestriction = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v] for v in self.V for b in self.B_v[v + self.safetyLevel]), "heightRestriction")
+      print(f'La w_v que me llegó fue {estimatedW_v}')
+      #Acá agregamos el safety lvl
+      self.heightRestriction = self.openPitModel.addConstrs((gp.quicksum(self.x_bt[ti, b] for ti in self.t_C) <= 1 - estimatedW_v[v] for v in self.V for b in self.B_v[v]), "heightRestriction")
       self.openPitModel.optimize()
       gp.GRB.QCPDual = True
 
       #objVal = self.openPitModel.objVal
 
       if self.openPitModel.Status == gp.GRB.OPTIMAL:
-         self.pi_v = [dualVariable.Pi for dualVariable in self.heightRestriction.values()]
+         self.pi_bDict = {}
+         for v in self.V:
+            for b in self.B_v[v]:
+               self.pi_bDict[v,b] = self.heightRestriction[v, b].pi
+                        
+         #pi_bvDict = {self.heightRestriction[v, b].pi for v in self.V for b in self.B_v[v]}
+         #self.pi_v = [dualVariable.pi for dualVariable in self.heightRestriction.values()]
          self.x_bt_values = self.openPitModel.getAttr('X', self.x_bt)
          objVal = self.openPitObjectiveFunction.getValue()
          self.lista_variable_Integrado = self.openPitModel.getAttr(GRB.Attr.X, self.openPitModel.getVars())
@@ -168,8 +181,8 @@ class SubProblem:
       #elif self.openPitModel.Status == gp.GRB.INFEASIBLE:
       else:
          print(self.openPitModel.Status)
-         self.pi_v = [dualVariable.farkasDual for dualVariable in self.heightRestriction.values()]
+         self.pi_v = [0 for dualVariable in self.heightRestriction.values()]
          objVal = 0
 
          print("El estado de la solución no es óptimo")
-      return objVal, self.pi_v
+      return objVal, self.pi_bDict

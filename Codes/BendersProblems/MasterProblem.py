@@ -10,18 +10,18 @@ from functools import reduce
 
 class MasterProblem:
     #Underground Model + Crown Pillar Restrictions.
-    def __init__(self, database, numberOfPeriods, colHeight, minColHeight):
+    def __init__(self, database, numberOfPeriods, colHeight, minColHeight,pos_x,pos_y,pos_z,pos_x_f,pos_y_f):
         self.database = database
         self.numberOfPeriods = numberOfPeriods
         self.DP_init = 0       #### Tipo de extracción
         self.desc = 0.1
-        self.colHeight = colHeight#300
-        self.minColHeight = minColHeight#0.40
-        self.pos_x = 440#430     
-        self.pos_y = 550     
-        self.pos_z = 780
-        self.pos_x_f = 720#730     
-        self.pos_y_f = 910     
+        self.colHeight = colHeight#630#300
+        self.minColHeight = minColHeight#0.20
+        self.pos_x = pos_x     
+        self.pos_y = pos_y   
+        self.pos_z = pos_z
+        self.pos_x_f = pos_x_f     
+        self.pos_y_f = pos_y_f  
         self.p_t = 3791.912
         self.orientationToExtractTheDrawpoints = 0
 
@@ -31,6 +31,7 @@ class MasterProblem:
         self.setUndergroundParameters()
         self.setUndergroundMineLimits()
         self.setUndergroundVariables()
+        #self.setVandB_vParameters()
 
     
     def getUndergroundVariablesFromCSV(self):
@@ -52,44 +53,56 @@ class MasterProblem:
     def setUndergroundParameters(self):
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
-        self.MU_mt = {period : 25806600.0 for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 0  for period in range(self.numberOfPeriods)}
-        self.MU_pt = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 0 for period in range(self.numberOfPeriods)}
+        self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
+        self.ML_mt = {period : 0/3  for period in range(self.numberOfPeriods)}
+        self.MU_pt = {period : 17777880.0  for period in range(self.numberOfPeriods)}#Mineral es planta
+        self.ML_pt = {period : 0/3 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
         self.NU_nt = {period : 59 for period in range(self.numberOfPeriods)} 
         self.NL_nt = {period : 0 for period in range(self.numberOfPeriods)}
         self.N_t   = {period : 57* (1 + period) for period in range(self.numberOfPeriods)}
-        self.RL_dt = {period : 0.3 for period in range(self.numberOfPeriods)}
+        self.RL_dt = {period : 0.25 for period in range(self.numberOfPeriods)}
         self.RU_dt = {period : 0.7 for period in range(self.numberOfPeriods)}
 
-
-    def setUndergroundVariables(self):
-        self.drawpoint, self.G_d, self.Q_d,self.q_d, self.C_pdt, self.C_mdt, self.predecessor, self.x_draw,self.y_draw, self.z_draw, self.drawpoints_blocks = drawpointFunction(
-                        self.pos_x, self.pos_y, self.pos_z, self.colHeight, self.DP_init, self.undergroundBlocksLenghtLimits, self.undergroundBlocksWidthLimits, self.undergroundBlocksHeightLimits, self.undergroundBlockTonnage, self.undergroundCP_S, self.undergroundCM_S, self.undergroundBlockMineral,
-                        self.undergroundCopperLaw, self.pos_x_f, self.pos_y_f,self.orientationToExtractTheDrawpoints)
-        self.drawpointsPredecessorDict = {}
-        self.drawpointsPredecessorDict[0] = []
-        self.drawpointsPredecessorDict[1] = [0]
-        for i in range(1,len(self.predecessor)):
-            if self.predecessor[i][0] not in self.drawpointsPredecessorDict.keys():
-                self.drawpointsPredecessorDict[self.predecessor[i][0]] = []
-            self.drawpointsPredecessorDict[self.predecessor[i][0]].append(self.predecessor[i][1])
-       
     def setUndergroundMineLimits(self):
         self.undergroundBlocksLenghtLimits = getNumberOfBlocksInADimension(self.undergroundBlocksLenght)
         self.undergroundBlocksWidthLimits = getNumberOfBlocksInADimension(self.undergroundBlocksWidth)
         self.undergroundBlocksHeightLimits = getNumberOfBlocksInADimension(self.undergroundBlocksHeight)
 
+    def setUndergroundVariables(self):
+        self.drawpoint, self.G_d, self.Q_d,self.q_d, self.C_pdt, self.C_mdt, self.predecessor, self.x_draw,self.y_draw, self.z_draw, self.drawpoints_blocks = drawpointFunction(
+                        self.pos_x, self.pos_y, self.pos_z, self.colHeight, self.DP_init, self.undergroundBlocksLenghtLimits, self.undergroundBlocksWidthLimits, self.undergroundBlocksHeightLimits, self.undergroundBlockTonnage, self.undergroundCP_S, self.undergroundCM_S, self.undergroundBlockMineral,
+                        self.undergroundCopperLaw, self.pos_x_f, self.pos_y_f,self.orientationToExtractTheDrawpoints)
+        self.predecessorDict = {}
+        self.predecessorDict[0] = []
+        self.predecessorDict[1] = [0]
+        for i in range(1,len(self.predecessor)):
+            if self.predecessor[i][0] not in self.predecessorDict.keys():
+                self.predecessorDict[self.predecessor[i][0]] = []
+            self.predecessorDict[self.predecessor[i][0]].append(self.predecessor[i][1])
+    """
+    def setVandB_vParameters(self):
+        self.setPossibleHeights()
+        self.V = [height for height in chain(range(self.minHeight,self.maxHeight,self.blockHeight), [self.maxHeight])]
+        self.B_v = {}
+        self.rho_v = {v: (v - self.minHeight)/(self.maxHeight - self.minHeight) for v in self.V}
+
+        for v in self.V:
+            numberOfBlocksBelowV = (self.undergroundBlocksLenghtLimits[3]*self.undergroundBlocksWidthLimits[3])*((v-self.minHeight)/self.undergroundBlocksHeightLimits[0])
+            blocksBelowV = [block for block in range(int(numberOfBlocksBelowV)) if not numberOfBlocksBelowV == 0]
+            self.B_v[v] = blocksBelowV
+    def setPossibleHeights(self):
+        self.blockHeight, self.maxHeight, self.minHeight, self.numOfDifferentsBlocks = self.undergroundBlocksHeightLimits
+    """
     def setModelandGetResults(self):
         self.objValue, self.variableValues, self.runtime, self.gap = self.setUndergroundModel()
 
     def addThetaRestriction(self, subProblemObjValue, estimatedW_v, pi_vb):
         self.undergroundModel.addConstr(self.theta <= subProblemObjValue + gp.quicksum(gp.quicksum((self.w_v[v]-estimatedW_v[v]) * pi_vb[b] for b in self.B_v) for v in self.V))
 
-    def setModel(self):#,v_p, theta_opt, w_opt):
+    def setModel(self):
                                 
         self.undergroundModel = gp.Model(name = 'Modelo Integrado')
         self.undergroundModel.Params.TimeLimit = 3600
@@ -97,10 +110,10 @@ class MasterProblem:
 
         # Underground  Model
 
-        #14. Naturaleza de las variables
-        self.x_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="x_d")
-        self.y_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.CONTINUOUS, name="y_d")
-        self.z_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="z_d")
+              #14. Naturaleza de las variables
+        self.x_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="x")
+        self.y_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.CONTINUOUS, name="y")
+        self.z_dt = self.undergroundModel.addVars(self.drawpoint, self.t_S, vtype=GRB.BINARY, name="z")
 
         #1. Restricción sobre la cantidad de tonelaje máxima y mínima a extraer en cada periodo.
         Ton_Up = self.undergroundModel.addConstrs((gp.quicksum(self.y_dt[d, ti]*self.G_d[d] for d in self.drawpoint) <= self.MU_mt[ti] for ti in self.t_S),
@@ -179,19 +192,35 @@ class MasterProblem:
         #16. Restricción sobre el inicio de la extracci ́on de los drawpoints.
 
 
-        alternative = self.undergroundModel.addConstrs(gp.quicksum(self.x_dt[a,s] for s in range(0,ti+1)) >= self.x_dt[d, ti] for d in self.drawpoint for ti in self.t_S for a in self.drawpointsPredecessorDict[d])
+        alternative = self.undergroundModel.addConstrs(gp.quicksum(self.x_dt[a,s] for s in range(0,ti+1)) >= self.x_dt[d, ti] for d in self.drawpoint for ti in self.t_S for a in self.predecessorDict[d])
         #resta_prec = self.undergroundModel.addConstrs((gp.quicksum(self.x_dt[self.predecessor[l][0], m]*(max(self.t_S)-m+1) for m in self.t_S) <=
         #                            gp.quicksum(self.x_dt[self.predecessor[l][1], m]*(max(self.t_S)-m+1) for m in self.t_S)  
         #                            for l in range(len(self.predecessor))), "DP_Sup")
 
-       
         
         #Conjuntos para el crown pillar
 
         #Restricciones del crown pillar
         #Variable 1 si y solo si el crown pillar esta ubicado en la elevaci ́on v, 0 en otro caso.
+        test_w = {745: 0.0,
+            785: 0.0,
+            825: 0.0,
+            865: 0.0,
+            905: 0.0,
+            945: 0.0,
+            985: 1.0,
+            1025: 0.0,
+            1065: 0.0,
+            1105: 0.0,
+            1145: 0.0,
+            1185: 0.0,
+            1225: 0.0,
+            1265: 0.0,
+            1305: 0.0}
         self.w_v = self.undergroundModel.addVars(self.V, vtype=GRB.BINARY, name="w")
-        self.theta = self.undergroundModel.addVar(vtype=GRB.CONTINUOUS,name="theta")
+        #self.w_v = self.undergroundModel.addVars(self.V,lb=test_w, ub=test_w ,vtype=GRB.BINARY, name="w")
+
+        self.theta = self.undergroundModel.addVar(vtype=GRB.CONTINUOUS,name="theta",lb=-GRB.INFINITY)
 
 
         pillar_2 = self.undergroundModel.addConstrs(gp.quicksum(self.y_dt[d, ti] 
@@ -199,20 +228,25 @@ class MasterProblem:
        
         pillar_3 = self.undergroundModel.addConstr(gp.quicksum(self.w_v[v] for v in self.V) == 1)
 
-        theta_restriction_1 = self.undergroundModel.addConstr(-gp.GRB.INFINITY <= self.theta)
-        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 1000000000)
+        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 900000000000)
 
-        #Función objetivo
+         #Función objetivo
         self.undergroundObjectiveFunction = self.theta + gp.quicksum(self.y_dt[d, ti]*((((self.p_t * self.q_d[d] - self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
                                         ((1+self.desc)**(self.t_S[ti]))) for ti in self.t_S for d in self.drawpoint)
 
         self.undergroundModel.setObjective(self.undergroundObjectiveFunction, GRB.MAXIMIZE)
         self.undergroundModel.Params.MIPGap = 0.05
 
+
     def optimize(self):
         self.undergroundModel.optimize()
-        lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
+        self.lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
         solucion = self.undergroundModel.objVal
         runtime = self.undergroundModel.Runtime
-        #print(f"GAP: {self.undergroundModel.MIPGap}")
-        return {key:value.X for key,value in zip(self.w_v, self.w_v.values())}, self.theta
+        gap_f = self.undergroundModel.MIPGap
+        estimatedW_v = {key:value.X for key,value in self.w_v.items()}
+        self.selectedHeight = [key for key,value in estimatedW_v.items() if value == 1][0]
+        self.x_dt_values = self.undergroundModel.getAttr('X', self.x_dt)
+        self.y_dt_values = self.undergroundModel.getAttr('X', self.y_dt)
+        self.z_dt_values = self.undergroundModel.getAttr('X', self.z_dt)
+        return estimatedW_v, self.theta

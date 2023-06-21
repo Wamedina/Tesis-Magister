@@ -10,18 +10,18 @@ from functools import reduce
 
 class MasterProblem:
     #Underground Model + Crown Pillar Restrictions.
-    def __init__(self, database, numberOfPeriods, colHeight, minColHeight):
+    def __init__(self, database, numberOfPeriods, colHeight, minColHeight,pos_x,pos_y,pos_z,pos_x_f,pos_y_f):
         self.database = database
         self.numberOfPeriods = numberOfPeriods
         self.DP_init = 0       #### Tipo de extracción
         self.desc = 0.1
         self.colHeight = colHeight#630#300
         self.minColHeight = minColHeight#0.20
-        self.pos_x = 440     
-        self.pos_y = 550     
-        self.pos_z = 780
-        self.pos_x_f = 720     
-        self.pos_y_f = 910     
+        self.pos_x = pos_x     
+        self.pos_y = pos_y   
+        self.pos_z = pos_z
+        self.pos_x_f = pos_x_f     
+        self.pos_y_f = pos_y_f  
         self.p_t = 3791.912
         self.orientationToExtractTheDrawpoints = 0
 
@@ -54,16 +54,16 @@ class MasterProblem:
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
         self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
-        self.ML_mt = {period : 25806600/3  for period in range(self.numberOfPeriods)}
+        self.ML_mt = {period : 0/3  for period in range(self.numberOfPeriods)}
         self.MU_pt = {period : 17777880.0  for period in range(self.numberOfPeriods)}#Mineral es planta
-        self.ML_pt = {period : 17777880/3 for period in range(self.numberOfPeriods)}
+        self.ML_pt = {period : 0/3 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
         self.A_d   = {period : 2 for period in range(self.numberOfPeriods)}
         self.NU_nt = {period : 59 for period in range(self.numberOfPeriods)} 
         self.NL_nt = {period : 0 for period in range(self.numberOfPeriods)}
         self.N_t   = {period : 57* (1 + period) for period in range(self.numberOfPeriods)}
-        self.RL_dt = {period : 0.3 for period in range(self.numberOfPeriods)}
+        self.RL_dt = {period : 0.25 for period in range(self.numberOfPeriods)}
         self.RU_dt = {period : 0.7 for period in range(self.numberOfPeriods)}
 
     def setUndergroundMineLimits(self):
@@ -212,7 +212,7 @@ class MasterProblem:
         pillar_3 = self.undergroundModel.addConstr(gp.quicksum(self.w_v[v] for v in self.V) == 1)
 
         theta_restriction_1 = self.undergroundModel.addConstr(-gp.GRB.INFINITY <= self.theta)
-        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 90000000000)
+        theta_restriction_2 = self.undergroundModel.addConstr(self.theta <= 900000000000)
 
          #Función objetivo
         self.undergroundObjectiveFunction = self.theta + gp.quicksum(self.y_dt[d, ti]*((((self.p_t * self.q_d[d] - self.C_pdt[d] ) * self.Q_d[d])-(self.C_mdt[d]*self.G_d[d]))/
@@ -224,7 +224,7 @@ class MasterProblem:
 
     def optimize(self):
         self.undergroundModel.optimize()
-        lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
+        self.lista_variable_Integrado = (self.undergroundModel.getAttr(GRB.Attr.X, self.undergroundModel.getVars()))
         solucion = self.undergroundModel.objVal
         runtime = self.undergroundModel.Runtime
         gap_f = self.undergroundModel.MIPGap

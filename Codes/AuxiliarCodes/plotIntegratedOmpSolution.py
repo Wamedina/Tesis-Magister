@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from getBlockPosition import getBlockPosition
 
 
-def plotUndergroundSolution(limites_x_C,limites_y_C,limites_z_C, drawpoints_blocks,drawpoints_xdt, drawpoints_ydt, periods): 
+def plotIntegratedOmpSolution(limites_x_C,limites_y_C,limites_z_C, drawpoints_blocks,drawpoints_xdt, drawpoints_ydt, periods,openPitDict): 
     colors = ['purple',       # Morado
                 'blue',      # Azul
                 'skyblue',      # Celeste
@@ -42,6 +42,16 @@ def plotUndergroundSolution(limites_x_C,limites_y_C,limites_z_C, drawpoints_bloc
                         voxels[posicion[0], posicion[1], posicion[2]] = True
                         colors_voxels[posicion[0], posicion[1], posicion[2]] = colors[period % len(colors)]  # Ciclamos a través de los colores.
 
+    # Creamos una matriz 3D de False con las dimensiones de los limites.
+
+    # Creamos una matriz 3D para los colores.
+
+    for bloque in openPitDict:
+        posicion = getBlockPosition(bloque,limites_x_C,limites_y_C, limites_z_C)#posicionar_dp_CA_S(drawpoint,bloque,x_draw,y_draw,z_draw,limites_x_C, limites_y_C)
+        voxels[posicion[0], posicion[1], posicion[2]] = True
+        period = openPitDict[bloque]
+        colors_voxels[posicion[0], posicion[1], posicion[2]] = colors[period % len(colors)]  # Ciclamos a través de los colores.
+
     fig = plt.figure(figsize=(15,15))
     ax = fig.add_subplot(projection='3d')
     #ax.set_aspect('auto')
@@ -54,7 +64,6 @@ def plotUndergroundSolution(limites_x_C,limites_y_C,limites_z_C, drawpoints_bloc
     ax.yaxis.set_tick_params(labelsize = 25)
     ax.legend(handles=[purple,blue, blue_sky, green, yellow])
     ax.voxels(voxels, facecolors=colors_voxels, edgecolor='none')
-    
     
 
     plt.show()

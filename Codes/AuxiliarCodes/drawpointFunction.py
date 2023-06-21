@@ -2,7 +2,7 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
                       pos_x_f, pos_y_f, orientacion):
     init_block = int((pos_z-limites_z[2])/10 * limites_x[3] * limites_y[3] + (pos_y-limites_y[2])/10 * limites_x[3] +  
                      (pos_x-limites_x[2])/10)
-
+    print(init_block)
     x_draw = []
     A = pos_x_f - pos_x
 
@@ -79,7 +79,7 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
     q_d_1 = []
     c_pd_1 = []
     c_md_1 = []
-    total_blocks = []
+    drawpoint_blocks_grouped = []
     for i in b1_l:
         Td_aux = 0
         Qd_aux = 0
@@ -92,8 +92,8 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
         b4 = int(b3 + 1)
         b5 = int(b3 + limites_y[3] + 1)
         b6 = int(b5 + 1)
-        total_blocks.extend([b1, b2, b3, b4, b5, b6])
-
+        if b6 > 1003519:
+            break
         Td_aux += (TON[b1] + TON[b2] + TON[b3] + TON[b4] + TON[b5] + TON[b6])
         cpd_aux += (CP_S[b1] + CP_S[b2] + CP_S[b3] + CP_S[b4] + CP_S[b5] + CP_S[b6])/6
         cmd_aux += (CM_S[b1] + CM_S[b2] + CM_S[b3] + CM_S[b4] + CM_S[b5] + CM_S[b6])/6
@@ -103,6 +103,7 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
         else:
             qd_aux += (TON[b1] * LEY[b1] + TON[b2] * LEY[b2] + TON[b3] * LEY[b3] +
                       TON[b4] * LEY[b4] + TON[b5] * LEY[b5] + TON[b6] * LEY[b6]) / Td_aux
+        drawpoint_blocks_grouped.append([b1, b2, b3, b4, b5, b6])
         T_d_1.append(Td_aux)
         Q_d_1.append(Qd_aux)
         q_d_1.append(qd_aux)
@@ -122,19 +123,23 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
     q_d = [] #
     c_pd = []
     c_md = []
-
-    for i in b_drawpoint:
+    drawpoints_blocks = {}    
+    for index,i in enumerate(b_drawpoint):
         Td_aux = 0
         Qd_aux = 0
         qd_aux = 0
         cpd_aux = 0
         cmd_aux = 0
+        block_asigned = []
         for j in i:
             Td_aux += T_d_1[j]
             Qd_aux += Q_d_1[j]
             qd_aux += q_d_1[j]*T_d_1[j]
             cpd_aux += c_pd_1[j]
             cmd_aux += c_md_1[j]
+            block_asigned.extend(drawpoint_blocks_grouped[j])
+
+        drawpoints_blocks[index] = block_asigned
         T_d.append(Td_aux)
         Q_d.append(Qd_aux)
         q_d.append(qd_aux/Td_aux)
@@ -270,12 +275,12 @@ def drawpointFunction(pos_x, pos_y, pos_z, col_height, DP_init, limites_x, limit
         lista_aux.append(DP_pred[i+1])
         lista_aux.append(DP_pred[i])
         predecessor.append(lista_aux)
-
+    """
     drawpoints_blocks = {}    
-    chunk_size = int(len(total_blocks)/len(drawpoint))
-
-    for drawpoint_id,blocks_range in zip(DP_pred,range(0, len(total_blocks), chunk_size)):
+    chunk_size = int(len(total_blocks)/len(drawpoint))        
+        
+    for drawpoint_id,blocks_range in zip(DP_pred,range(0, len(total_blocks), len(drawpoint))):
         drawpoints_blocks[drawpoint_id] = total_blocks[blocks_range:blocks_range + chunk_size]
 
-
+|   """
     return (drawpoint, T_d, Q_d, q_d, c_pd, c_md, predecessor, x_draw, y_draw, z_draw,drawpoints_blocks)
