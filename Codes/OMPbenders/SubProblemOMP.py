@@ -49,9 +49,9 @@ class SubProblem:
    def setOpenPitParameters(self):
       #OpenPit Parameters
       self.t_C   = {period : period + 1 for period in range(self.numberOfPeriods)}
-      self.RMu_t = {period : 25806600.0 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
+      self.RMu_t = {period : 25806600.0/2 for period in range(self.numberOfPeriods)}#Superior infinita, 0 por abajo Originales: 13219200
       self.RMl_t = {period : 0.0/3 for period in range(self.numberOfPeriods)}#Valor original 8812800.0
-      self.RPu_t = {period : 17777880.0 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
+      self.RPu_t = {period : 17777880.0/2 for period in range(self.numberOfPeriods)}#Valor original 10933380.0
       self.RPl_t = {period : 0/3 for period in range(self.numberOfPeriods)}#Valor original 7288920.0 
       self.qu_t  = {period : 1 for period in range(self.numberOfPeriods)}#Leyes promedio maxima y minima.
       self.ql_t  = {period : 0.0001 for period in range(self.numberOfPeriods)}

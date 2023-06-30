@@ -6,7 +6,7 @@ def Separador_Variable_CA(LISTA_VARIABLE_X, bloques_CA):
     blocks_year =[]
     aux_year = []
     for i in LISTA_VARIABLE_X:
-        if i > 0.5:
+        if i >= 0.5:
             a = j//len(bloques_CA)+1
             b = j%len(bloques_CA)
             aux_year.append(int(b))
@@ -108,7 +108,7 @@ def plotGurobiOpenPitSolution(variableValues,CA_blocks, openPitBlocksLenghtLimit
                 '#000000'       # Negro
             ]
 
-    fig = plt.figure(figsize=(25,25))
+    fig = plt.figure(figsize=(15,15))
     ax = fig.add_subplot(projection='3d')
     ax.set_aspect('auto')
 

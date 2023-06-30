@@ -53,9 +53,9 @@ class MasterProblem:
     def setUndergroundParameters(self):
         #Underground Parameters
         self.t_S   = {period : period + 1 for period in range(self.numberOfPeriods)}
-        self.MU_mt = {period : 25806600.0  for period in range(self.numberOfPeriods)} #Tonleage es mina
+        self.MU_mt = {period : 25806600.0/2  for period in range(self.numberOfPeriods)} #Tonleage es mina
         self.ML_mt = {period : 0/3  for period in range(self.numberOfPeriods)}
-        self.MU_pt = {period : 17777880.0  for period in range(self.numberOfPeriods)}#Mineral es planta
+        self.MU_pt = {period : 17777880.0/2  for period in range(self.numberOfPeriods)}#Mineral es planta
         self.ML_pt = {period : 0/3 for period in range(self.numberOfPeriods)}
         self.qU_dt = {period : 1 for period in range(self.numberOfPeriods)}
         self.qL_dt = {period : 0.0001 for period in range(self.numberOfPeriods)}
@@ -229,7 +229,7 @@ class MasterProblem:
         runtime = self.undergroundModel.Runtime
         gap_f = self.undergroundModel.MIPGap
         estimatedW_v = {key:value.X for key,value in self.w_v.items()}
-        self.selectedHeight = [key for key,value in estimatedW_v.items() if value == 1][0]
+        self.selectedHeight = [key for key,value in estimatedW_v.items() if value > 0.5][0]
         self.x_dt_values = self.undergroundModel.getAttr('X', self.x_dt)
         self.y_dt_values = self.undergroundModel.getAttr('X', self.y_dt)
         self.z_dt_values = self.undergroundModel.getAttr('X', self.z_dt)

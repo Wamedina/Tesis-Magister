@@ -245,7 +245,7 @@ class MasterProblem:
         runtime = self.undergroundModel.Runtime
         gap_f = self.undergroundModel.MIPGap
         estimatedW_v = {key:value.X for key,value in self.w_v.items()}
-        self.selectedHeight = [key for key,value in estimatedW_v.items() if value == 1][0]
+        self.selectedHeight = [key for key,value in estimatedW_v.items() if value > 0.5 ][0]
         self.x_dt_values = self.undergroundModel.getAttr('X', self.x_dt)
         self.y_dt_values = self.undergroundModel.getAttr('X', self.y_dt)
         self.z_dt_values = self.undergroundModel.getAttr('X', self.z_dt)
