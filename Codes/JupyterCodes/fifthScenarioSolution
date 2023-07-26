@@ -1,6 +1,0 @@
-Running OMP version: master 1.8.5 d7d16093 2022-11-16 20:03:46 -0300
-Invoked using: bin/OMP_SOLVER_C1290 ../FilesToExecuteOmpOpenPit/files/openPit.blocks ../FilesToExecuteOmpOpenPit/files/openPit.prec ../FilesToExecuteOmpOpenPit/files/openPit.prob ../FilesToExecuteOmpOpenPit/params/dbs_duals.params
-license to sign [DEFAULTclient-signatureAFhG-4bsA-AAA=lic_ver200valid-to2023-03-07]
-Error checking license: License file expired.
-Please ask for a license sending a mail to nicolas.loira@alicantolabs.com with the following host information:
-HOST=AFhG-4bsA-AAA=
